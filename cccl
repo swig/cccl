@@ -4,7 +4,7 @@
 # Wrapper around MS's cl.exe and link.exe to make them act more like
 # Unix cc and ld
 #
-# Copyright (C) 2001 Geoffrey Wossum (gwossum@acm.org)
+# Copyright (C) 2000-2002 Geoffrey Wossum (gwossum@acm.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ while test $# -gt 0; do
 	cat <<EOF
 cccl 0.01
 
-Copyright 2000 Geoffrey Wossum
+Copyright 2000-2002 Geoffrey Wossum
 This is free software; see the source for copying conditions.  There is NO
 waranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 EOF
@@ -71,7 +71,7 @@ EOF
 	clopt="$clopt /c"
 	;;
 
-    -g[0-9])
+    -g[0-9] | -g)
 	# cl only supports one debugging level
 	clopt="$clopt /Zi"
 	;;
