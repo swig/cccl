@@ -15,6 +15,7 @@ The cccl SourceForge project page is at
 \section gs Getting Started
 
 First, you'll want to \link install install cccl \endlink.  Then, you'll 
-probably want to learn \link use autotools and MSVC together \endlink.
+probably want to learn about \link autotools using autotools and 
+MSVC together \endlink.
 
 */
