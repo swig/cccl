@@ -1,7 +1,13 @@
 AC_INIT(cccl)
-AM_INIT_AUTOMAKE(cccl, 0.01)
-
+AM_INIT_AUTOMAKE(cccl, 0.02)
 AC_PROG_INSTALL
 
-AC_OUTPUT(Makefile)
+dnl doxygen is used to create the documentation
+dnl It's okay if doxygen is not found
+AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, "echo doxygen not available")
+
+
+AC_OUTPUT(Makefile		\
+	  doc/Doxyfile		\
+	 )
 

@@ -1,0 +1,20 @@
+/*!
+
+ \mainpage cccl (cc to cl.exe)
+
+cccl makes MSVC's cl.exe act like Unix cc's by converting cc command line
+parameters into one's cl.exe understands.  This is especially useful if
+you want to use GNU autotools (autoconf/automake/libtool) with MSVC.
+
+\section Obtaining cccl
+
+The cccl web page is at <a href="http://cccl.sf.net">http://cccl.sf.net</a>.
+The cccl SourceForge project page is at 
+<a href="http://sf.net/projects/cccl">http://sf.net/projects/cccl</a>.
+
+\section gs Getting Started
+
+First, you'll want to \link install install cccl \endlink.  Then, you'll 
+probably want to learn \link use autotools and MSVC together \endlink.
+
+*/

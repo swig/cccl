@@ -1,0 +1,55 @@
+/*! \page usage cccl Usage
+
+cccl is a wrapper around Microsoft's cl.exe.  It converts traditional
+Unix cc command line parameters to their cl.exe equivalents.
+
+Also, cc on Unix serves as a front end to the compiler and the linker.  
+cl.exe, however, is mainly on the compiler (it does support a limited
+compile and link).  The Microsoft linker, link.exe, usually must be
+invoked explicitly.  cccl attempts to choose whether it should invoke
+cl.exe or link.exe, adjusting the command line parameters as appropriate.
+It probably does not do a very good job of this, but it seems to work
+in most common cases.  Trying to compile and link in a single step will
+probably make cccl very confused.
+
+\section options Options
+
+The following options are understood by cccl:
+
+ - \b -ansi Converts to cl.exe's \b /Za
+
+ - \b -c Converts to cl.exe's \b /C
+
+ - \b -g[0-9] Converts to cl.exe's \b /Zi (cl.exe only supports one 
+      debug level)
+
+ - <b>-L<i>path</i></b> Converts to link.exe's <b>/LIBPATH:<i>path</i></b>
+
+ - <b>-l<i>library</i></b> Converts to <b>lib<i>library</i>.lib</b>
+
+ - \b -m386 Converts to cl.exe's \b /G3
+
+ - \b -m486 Converts to cl.exe's \b /G4
+
+ - \b -mpentium Converts to cl.exe's \b /G5
+
+ - \b -mpentiumpro Converts to cl.exe's \b /G6
+
+ - \b -o If cccl decides to invoke cl.exe, \b /Fo will be given to cl.exe
+   if the output file is an object file, otherwise \b /Fe will be given
+   to cl.exe.  If cccl decides to run link.exe, then the output file
+   will be given using link.exe's \b /out: option.
+
+ - \b -pendantic Ignored, cl.exe does not support any equivalent.
+
+ - \b *.(cc|cxx|C) C++ source file, \b /Tp option given to cl.exe
+
+ All other options are passed untouched to either cl.exe or link.exe
+
+ cccl will give options to cl.exe to correctly compile C++ source files
+ even if they don't have a .cpp extension (.cc, .cxx, or .C).
+
+ If any object file (.o, .obj) or library file (.a, .lib) is seen in the 
+ command line, cccl will invoke link.exe.
+
+*/

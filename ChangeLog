@@ -1,2 +1,6 @@
-09 Aug 2001
-	First public release
+Version 0.02
+ - Added documentation on using cccl with autotools
+ - cccl now processes "-g" option properly
+	
+Version 0.01
+ - First public release

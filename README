@@ -10,6 +10,12 @@ cccl's main use is for using Unix build processes with Microsoft compilers.
 Using cccl in conjunction with ports of Unix utilities, it is possible to 
 build many Unix packages using MSVC, without modifying the build process.
 
+Full Documentation
+------------------
+Documentation, including how to use autotools with MSVC by using cccl, is
+now included!  The documentation is in HTML and can be found in 
+doc/html/index.html.
+
 Motivation
 ----------
 Why would I build a wrapper script to make cl and link act like gcc, when
