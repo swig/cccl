@@ -1,0 +1,7 @@
+AC_INIT(cccl)
+AM_INIT_AUTOMAKE(cccl, 0.01)
+
+AC_PROG_INSTALL
+
+AC_OUTPUT(Makefile)
+

@@ -1,0 +1,7 @@
+#!/bin/sh
+# bootstrap 
+# prepares a freshly checked out autotools project to be compiled
+
+aclocal $ACLOCAL_FLAGS \
+&& autoconf \
+&& automake --add-missing --copy
