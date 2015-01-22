@@ -174,7 +174,9 @@ fi
 
 extraopt="/EHsc /GR /W3"
 #extraopt="/EHsc /GR /W3 /D_CRT_SECURE_NO_DEPRECATE"
-echo "$prog $extraopt $clopt $linkopt"
+# This echo is annoying when running 'make -s'. How to fix?
+# Maybe echo if /nologo not specified ??
+#echo "$prog $extraopt $clopt $linkopt"
 exitcode=exec $prog $extraopt $clopt $linkopt
 exit $exitcode
 
