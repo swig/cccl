@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # cccl 
-# Wrapper around MS's cl.exe and link.exe to make them act more like
-# Unix cc and ld
+# Wrapper around MS's cl.exe to make it act more like Unix cc
 #
 # Copyright (C) 2000-2003 Geoffrey Wossum (gwossum@acm.org)
 #
@@ -26,19 +25,17 @@ usage()
     cat <<EOF
 Usage: cccl [OPTIONS]
 
-cccl is a wrapper around Microsoft's cl.exe and link.exe.  It translates
-parameters that Unix cc's and ld's understand to parameters that cl and link
-understand.
+cccl is a wrapper around Microsoft's cl.exe.  It translates parameters
+that Unix cc's understand to parameters that cl understand.
 EOF
     exit $1
 }
 
-# prog specifies the program that should be run (cl.exe or link.exe)
-# We'll assume cl to start out
+# prog specifies the program that should be run cl.exe
 prog=cl
 # opts specifies the command line to pass to the MSVC program
 clopt="/nologo"
-linkopt=""
+#linkopt=""
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
 
@@ -53,102 +50,107 @@ while test $# -gt 0; do
 
     case "$1" in
     --version)
-	cat <<EOF
+        cat <<EOF
 cccl 0.03
 
 Copyright 2000-2003 Geoffrey Wossum
 This is free software; see the source for copying conditions.  There is NO
-waranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 EOF
-	exit 1;
-	;;
+        exit 1;
+        ;;
 
     -ansi)
-	clopt="$clopt /Za"
-	;;
+        clopt="$clopt /Za"
+        ;;
 
     -c)
-	# -c (compile only) is actually the same, but for clarity...
-	clopt="$clopt /c"
-	;;
+        # -c (compile only) is actually the same, but for clarity...
+        clopt="$clopt /c"
+        ;;
 
     -g[0-9] | -g)
-	# cl only supports one debugging level
-	clopt="$clopt /Zi"
-	;;
+        # cl only supports one debugging level
+        clopt="$clopt /Zi"
+        ;;
 
     -L*)
-	path=`echo "$1" | sed 's/-L//'`
-	linkopt="$linkopt /LIBPATH:$path"
-	;;
+        path=`echo "$1" | sed 's/-L//'`
+        linkopt="$linkopt /LIBPATH:$path"
+        ;;
 
     -l*)
-	lib=`echo "$1" | sed 's/-l//'`
-	lib="lib$lib.lib"
-	
-	clopt="$clopt $lib"
-	linkopt="$linkopt $lib"
-	;;
+        lib=`echo "$1" | sed 's/-l//'`
+#       lib="lib$lib.lib"
+        lib="$lib.lib"
+        
+        clopt="$clopt $lib"
+#       linkopt="$linkopt $lib"
+        ;;
 
     -m386)
-	clopt="$clopt /G3"
-	;;
+        clopt="$clopt /G3"
+        ;;
 
     -m486)
-	clopt="$clopt /G4"
-	;;
+        clopt="$clopt /G4"
+        ;;
 
     -mpentium)
-	clopt="$clopt /G5"
-	;;
+        clopt="$clopt /G5"
+        ;;
 
     -mpentiumpro)
-	clopt="$clopt /G6"
-	;;
+        clopt="$clopt /G6"
+        ;;
 
     -o)
-	# specifying output file, is it an object or an executable
-	shift
-	case "$1" in
-	*.o | *.obj)
-	    clopt="$clopt /Fo$1"
-	;;
-	
-	*.exe)
-	    clopt="$clopt /Fe$1";
-	    linkopt="$linkopt /out:$1"
-	;;
-	esac;;
+        # specifying output file, is it an object or an executable
+        shift
+        case "$1" in
+        *.o | *.obj)
+            clopt="$clopt /Fo$1"
+        ;;
+        
+        *.exe | *.dll | *.pyd)
+            clopt="$clopt /Fe$1";
+#           linkopt="$linkopt /out:$1"
+        ;;
+        esac;;
 
     -pedantic)
-	#ignore pedantic
-	;;
+        #ignore pedantic
+        ;;
 
     -W*)
         #ignore warnings
         ;;
 
-    *.cc | *.cxx | *.C)
-	# C++ source file with non .cpp extension, make sure cl understand 
-	# that it is C++
-	clopt="$clopt /Tp$1"
-	;;
+    -shared)
+            clopt="$clopt /LD";
+        ;;
 
-    *.o | *.obj | *.a | *.lib)
-	# Object files/libraries seen, this command will require link
-	# Switch the prog to link
-	linkopt="$linkopt $1"
-	prog="link"
-	;;
+    *.cc | *.cxx | *.C)
+        # C++ source file with non .cpp extension, make sure cl understand 
+        # that it is C++
+        clopt="$clopt /Tp$1"
+        ;;
+
+#    *.o | *.obj | *.a | *.lib)
+#       # Object files/libraries seen, this command will require link
+#       # Switch the prog to link
+#       linkopt="$linkopt $1"
+#       prog="link"
+#       ;;
 
     *)
-	clopt="$clopt $1"
-	linkopt="$linkopt $1"
-	if test x$optarg != x ; then
-	    clopt="$clopt=$optarg"
-	    linkopt="$linkopt=$optarg"
-	fi
-	;;
+        clopt="$clopt $1"
+#       linkopt="$linkopt $1"
+        if test x$optarg != x ; then
+            clopt="$clopt=$optarg"
+#           linkopt="$linkopt=$optarg"
+        fi
+        ;;
 
     esac
     shift
@@ -159,15 +161,19 @@ if test x$gotparam = x ; then
     exit 1
 fi
 
-# choose which opts we built up based on which program will actually run
-if test x$prog = xcl ; then
-    opts=$clopt
-else
-    opts=$linkopt
+## choose which opts we built up based on which program will actually run
+##if test x$prog = xcl ; then
+#    opts=$clopt
+#else
+#    opts=$linkopt
+#fi
+
+if test "$linkopt"; then
+    linkopt="/link $linkopt"
 fi
 
-echo "$prog $opts"
-exec $prog $opts
-exit 0
+echo "$prog $clopt $linkopt"
+exitcode=exec $prog $clopt $linkopt
+exit $exitcode
 
     
