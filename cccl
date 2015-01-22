@@ -51,7 +51,7 @@ while test $# -gt 0; do
     case "$1" in
     --version)
         cat <<EOF
-cccl 0.03
+cccl 0.03 (modified for SWIG)
 
 Copyright 2000-2003 Geoffrey Wossum
 This is free software; see the source for copying conditions.  There is NO
@@ -172,8 +172,10 @@ if test "$linkopt"; then
     linkopt="/link $linkopt"
 fi
 
-echo "$prog $clopt $linkopt"
-exitcode=exec $prog $clopt $linkopt
+extraopt="/EHsc /GR /W3"
+#extraopt="/EHsc /GR /W3 /D_CRT_SECURE_NO_DEPRECATE"
+echo "$prog $extraopt $clopt $linkopt"
+exitcode=exec $prog $extraopt $clopt $linkopt
 exit $exitcode
 
     
