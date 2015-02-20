@@ -177,20 +177,18 @@ if test "$linkopt"; then
 fi
 
 extraopt=(/EHsc /GR /W3)
-# This echo is annoying when running 'make -s'. How to fix?
-# Maybe echo if /nologo not specified ??
+
 if test -n "$CCCL_VERBOSE" ; then
-  printf "$prog"
+  echo -n "$prog"
   for opt in "${extraopt[@]}" ; do
-    printf " \"$opt\""
+    echo -n " \"$opt\""
   done
   for opt in "${clopt[@]}" ; do
-    printf " \"$opt\""
+    echo -n " \"$opt\""
   done
-  printf "$linkopt"
-  printf "\n"
+  echo "$linkopt"
 fi
+
 exitcode=exec $prog ${extraopt[@]} ${clopt[@]} $linkopt
 exit $exitcode
 
-    
