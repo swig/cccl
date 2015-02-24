@@ -38,7 +38,7 @@ IFS=""
 prog=cl
 # opts specifies the command line to pass to the MSVC program
 clopt=("/nologo")
-#linkopt=""
+linkopt=("/link")
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
 
@@ -79,7 +79,7 @@ EOF
 
     -L*)
         path=`echo "$1" | sed 's/-L//'`
-        linkopt="$linkopt /LIBPATH:$path"
+        linkopt+=("/LIBPATH:$path")
         ;;
 
     -l*)
@@ -88,7 +88,7 @@ EOF
         lib="$lib.lib"
         
         clopt+=("$lib")
-#       linkopt="$linkopt $lib"
+#       linkopt+=("$lib")
         ;;
 
     -m386)
@@ -117,7 +117,7 @@ EOF
         
         *.exe | *.dll | *.pyd)
             clopt+=("/Fe$1")
-#           linkopt="$linkopt /out:$1"
+#           linkopt+=("/out:$1")
         ;;
         esac;;
 
@@ -142,15 +142,13 @@ EOF
 #    *.o | *.obj | *.a | *.lib)
 #       # Object files/libraries seen, this command will require link
 #       # Switch the prog to link
-#       linkopt="$linkopt $1"
+#       linkopt+=("$1")
 #       prog="link"
 #       ;;
 
     *)
-#       linkopt="$linkopt $1"
         if test x$optarg != x ; then
             clopt+=("$1=$optarg")
-#           linkopt="$linkopt=$optarg"
         else
             clopt+=("$1")
         fi
@@ -165,15 +163,8 @@ if test x$gotparam = x ; then
     exit 1
 fi
 
-## choose which opts we built up based on which program will actually run
-##if test x$prog = xcl ; then
-#    opts=$clopt
-#else
-#    opts=$linkopt
-#fi
-
-if test "$linkopt"; then
-    linkopt="/link $linkopt"
+if test ${#linkopt[@]} -eq 1 ; then
+    linkopt=()
 fi
 
 extraopt=(/EHsc /GR /W3)
@@ -186,9 +177,12 @@ if test -n "$CCCL_VERBOSE" ; then
   for opt in "${clopt[@]}" ; do
     echo -n " \"$opt\""
   done
-  echo "$linkopt"
+  for opt in "${linkopt[@]}" ; do
+    echo -n " \"$opt\""
+  done
+  echo ""
 fi
 
-exitcode=exec $prog ${extraopt[@]} ${clopt[@]} $linkopt
+exitcode=exec $prog ${extraopt[@]} ${clopt[@]} ${linkopt[@]}
 exit $exitcode
 
