@@ -146,6 +146,10 @@ EOF
 #       prog="link"
 #       ;;
 
+    /LTCG*)
+            linkopt+=("$1")
+        ;;
+
     *)
         if test x$optarg != x ; then
             clopt+=("$1=$optarg")
