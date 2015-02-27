@@ -44,6 +44,10 @@ gotparam=
 muffle=
 verbose=
 
+if test -n "$CCCL_OPTIONS" ; then
+    set -- $CCCL_OPTIONS $@
+fi
+
 ### Run through every option and convert it to the proper MS one
 while test $# -gt 0; do
     case "$1" in
