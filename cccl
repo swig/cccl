@@ -41,6 +41,7 @@ clopt=("/nologo")
 linkopt=("/link")
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
+muffle=
 
 ### Run through every option and convert it to the proper MS one
 while test $# -gt 0; do
@@ -52,6 +53,11 @@ while test $# -gt 0; do
     gotparam=1
 
     case "$1" in
+    --cccl-muffle)
+        # Remove the unnecessary junk that the compiler outputs to stdout
+        muffle=1
+        ;;
+
     --version)
         cat <<EOF
 cccl 0.03 (modified for SWIG)
@@ -187,6 +193,11 @@ if test -n "$CCCL_VERBOSE" ; then
   echo ""
 fi
 
-exitcode=exec $prog ${extraopt[@]} ${clopt[@]} ${linkopt[@]}
-exit $exitcode
+if test -z "$muffle" ; then
+    exec $prog ${extraopt[@]} ${clopt[@]} ${linkopt[@]}
+else
+  # tr needed below for $ in regex to work (simple alternative to dos2unix)
+    exec $prog ${extraopt[@]} ${clopt[@]} ${linkopt[@]} | tr -d '\r' | grep -v -e "\.cpp$" -e "\.cxx$" -e "\.cc$" -e "\.C$" -e "\.c$" -e "^   Creating library" -e "^Generating Code"
+    exit ${PIPESTATUS[0]}
+fi
 
