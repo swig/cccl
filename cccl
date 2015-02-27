@@ -42,6 +42,7 @@ linkopt=("/link")
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
 muffle=
+verbose=
 
 ### Run through every option and convert it to the proper MS one
 while test $# -gt 0; do
@@ -56,6 +57,10 @@ while test $# -gt 0; do
     --cccl-muffle)
         # Remove the unnecessary junk that the compiler outputs to stdout
         muffle=1
+        ;;
+
+    --cccl-verbose)
+        verbose=1
         ;;
 
     --version)
@@ -179,7 +184,7 @@ fi
 
 extraopt=(/EHsc /GR /W3)
 
-if test -n "$CCCL_VERBOSE" ; then
+if test -n "$verbose" ; then
   echo -n "$prog"
   for opt in "${extraopt[@]}" ; do
     echo -n " \"$opt\""
