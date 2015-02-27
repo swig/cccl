@@ -75,7 +75,7 @@ Copyright 2000-2003 Geoffrey Wossum
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 EOF
-        exit 1;
+        exit 0;
         ;;
 
     -ansi)
