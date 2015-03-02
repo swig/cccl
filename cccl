@@ -170,20 +170,22 @@ EOF
 #       prog="link"
 #       ;;
 
-    /LTCG*)
+    /*)
+        # All / options are passed to the linker
         linkopt+=("${slash}${1:1}")
         ;;
 
-    /*)
-        clopt+=("${slash}${1:1}")
+    -*)
+        # All - options are passed to the compiler
+        if test x$optarg != x ; then
+            clopt+=("${slash}${1:1}=$optarg")
+        else
+            clopt+=("${slash}${1:1}")
+        fi
         ;;
 
     *)
-        if test x$optarg != x ; then
-            clopt+=("$1=$optarg")
-        else
-            clopt+=("$1")
-        fi
+        clopt+=("$1")
         ;;
 
     esac
