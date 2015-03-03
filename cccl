@@ -40,9 +40,6 @@ case $MACHTYPE in
         ;;
 esac
 
-# Whitespace in paths is dealt with by setting IFS and using bash arrays
-IFS=""
-
 # prog specifies the program that should be run cl.exe
 prog=cl
 # opts specifies the command line to pass to the MSVC program
@@ -55,10 +52,8 @@ muffle=
 verbose=
 shared_index=-1
 
-if test -n "$CCCL_OPTIONS" ; then
-    set -- $CCCL_OPTIONS $@
-fi
-
+processargs()
+{
 ### Run through every option and convert it to the proper MS one
 while test $# -gt 0; do
     case "$1" in
@@ -195,6 +190,13 @@ EOF
     esac
     shift
 done
+}
+
+# Whitespace in paths is dealt with by setting IFS and using bash arrays
+# Except additional arguments in CCCL_OPTIONS need to be space separated
+processargs $CCCL_OPTIONS
+IFS=""
+processargs $@
 
 if test $shared_index -ge 0 -a -n "$debug"; then
     clopt[$shared_index]="${slash}LDd"
