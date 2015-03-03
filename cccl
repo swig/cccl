@@ -49,9 +49,11 @@ prog=cl
 clopt=("${slash}nologo")
 linkopt=("${slash}link")
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
+debug=
 gotparam=
 muffle=
 verbose=
+shared_index=-1
 
 if test -n "$CCCL_OPTIONS" ; then
     set -- $CCCL_OPTIONS $@
@@ -99,6 +101,7 @@ EOF
     -g[0-9] | -g)
         # cl only supports one debugging level
         clopt+=("${slash}Zi")
+        debug=1
         ;;
 
     -L*)
@@ -154,6 +157,7 @@ EOF
         ;;
 
     -shared)
+            shared_index=${#clopt[@]}
             clopt+=("${slash}LD")
         ;;
 
@@ -191,6 +195,10 @@ EOF
     esac
     shift
 done
+
+if test $shared_index -ge 0 -a -n "$debug"; then
+    clopt[$shared_index]="${slash}LDd"
+fi
 
 if test x$gotparam = x ; then
     usage
