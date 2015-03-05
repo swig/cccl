@@ -23,12 +23,11 @@
 usage()
 {
     cat <<EOF
-Usage: cccl [OPTIONS]
+Usage: cccl [--cccl-muffle] [--cccl-verbose] [--help] [--version] [OPTIONS]
 
-cccl is a wrapper around Microsoft's cl.exe.  It translates parameters
-that Unix cc's understand to parameters that cl understand.
+cccl is a wrapper around Microsoft's cl.exe compiler.  It translates parameters
+given by [OPTIONS] that Unix cc understands into parameters that cl understands.
 EOF
-    exit $1
 }
 
 case $MACHTYPE in
@@ -64,6 +63,11 @@ while test $# -gt 0; do
     gotparam=1
 
     case "$1" in
+    --help)
+        usage
+        exit 0
+        ;;
+
     --cccl-muffle)
         # Remove the unnecessary junk that the compiler outputs to stdout
         muffle=1
