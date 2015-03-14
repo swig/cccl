@@ -101,6 +101,13 @@ EOF
         # cl only supports one debugging level
         clopt+=("${slash}Zi")
         debug=1
+
+    -O0)
+        clopt+=("${slash}Ot")
+        ;;
+
+    -O2)
+        clopt+=("${slash}O2")
         ;;
 
     -L*)
@@ -137,7 +144,7 @@ EOF
         *.o | *.obj)
             clopt+=("${slash}Fo$1")
         ;;
-        
+
         *.exe | *.dll | *.pyd)
             clopt+=("${slash}Fe$1")
         ;;
@@ -149,6 +156,22 @@ EOF
 
     -W*)
         #ignore warnings
+        ;;
+
+    -fno-strict-aliasing*)
+        #ignore aliasing
+        ;;
+
+    -isystem)
+        shift
+        clopt+=("${slash}I$1")
+        ;;
+
+    -MT)
+        exit 0
+        ;;
+
+    -mno-cygwin)
         ;;
 
     -shared)
@@ -204,7 +227,11 @@ if test ${#linkopt[@]} -eq 1 ; then
     linkopt=()
 fi
 
-extraopt=(${slash}EHsc ${slash}GR ${slash}W3)
+extraopt=(${slash}FS ${slash}EHsc ${slash}GR ${slash}W3)
+
+if test x$V = x1 ; then
+    verbose=1
+fi
 
 if test -n "$verbose" ; then
   echo -n "$prog"
