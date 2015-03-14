@@ -44,8 +44,8 @@ prog=cl
 # opts specifies the command line to pass to the MSVC program
 clopt=("${slash}nologo")
 linkopt=("${slash}link")
-# gotparam is 0 if we didn't ever see a param, in which case we show usage()
 debug=
+# gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
 muffle=
 verbose=
@@ -110,11 +110,8 @@ EOF
 
     -l*)
         lib=`echo "$1" | sed 's/-l//'`
-#       lib="lib$lib.lib"
         lib="$lib.lib"
-        
         clopt+=("$lib")
-#       linkopt+=("$lib")
         ;;
 
     -m386)
@@ -143,7 +140,6 @@ EOF
         
         *.exe | *.dll | *.pyd)
             clopt+=("${slash}Fe$1")
-#           linkopt+=("${slash}out:$1")
         ;;
         esac;;
 
@@ -165,13 +161,6 @@ EOF
         # that it is C++
         clopt+=("${slash}Tp$1")
         ;;
-
-#    *.o | *.obj | *.a | *.lib)
-#       # Object files/libraries seen, this command will require link
-#       # Switch the prog to link
-#       linkopt+=("$1")
-#       prog="link"
-#       ;;
 
     /*)
         # All / options are passed to the linker
