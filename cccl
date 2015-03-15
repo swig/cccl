@@ -101,6 +101,7 @@ EOF
         # cl only supports one debugging level
         clopt+=("${slash}Zi")
         debug=1
+        ;;
 
     -O0)
         clopt+=("${slash}Ot")
