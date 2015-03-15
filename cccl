@@ -228,7 +228,7 @@ if test ${#linkopt[@]} -eq 1 ; then
     linkopt=()
 fi
 
-extraopt=(${slash}FS ${slash}EHsc ${slash}GR ${slash}W3)
+extraopt=(${slash}EHsc ${slash}GR ${slash}W3)
 
 if test x$V = x1 ; then
     verbose=1
