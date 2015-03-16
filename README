@@ -4,8 +4,8 @@ http://cccl.sf.net
 
 Introduction
 ------------
-cccl is a wrapper around Microsoft Visual C++'s cl.exe and link.exe.  It
-converts Unix compiler parameters into parameters understood by cl and link.
+cccl is a wrapper around Microsoft Visual C++'s cl.exe.  It
+converts Unix compiler parameters into parameters understood by cl.exe.
 cccl's main use is for using Unix build processes with Microsoft compilers.
 Using cccl in conjunction with ports of Unix utilities, it is possible to 
 build many Unix packages using MSVC, without modifying the build process.
@@ -18,7 +18,7 @@ doc/html/index.html.
 
 Motivation
 ----------
-Why would I build a wrapper script to make cl and link act like gcc, when
+Why would I build a wrapper script to make cl.exe act like gcc, when
 gcc is available for Windows?  I had a cross-platform project that I wanted
 to use autoconf/automake/libtool for the build process.  The obvious thing
 to do would have been to use gcc on all platforms.  But on Windows I was
@@ -35,46 +35,30 @@ proved so useful to me, I should release it to the world.
 Installing
 ----------
 cccl requires ports of the following Unix utilities:
-  - a Bourne compatible shell
+  - bash
   - sed
+  - tr
 
-I know cccl works with bash and sed from Cygwin.  It would probably also 
-work with other shells and seds, such as the MKS Toolkit.  If you discover
-that it does work (or does not work) with others, let me know.
+cccl is known to work on Cygwin and MinGW.
 
 You can either copy the cccl script to somewhere on your system, or you can
-do a "./configure ; make install" if you have a Unixish enough environment
+do a "./configure && make install" if you have a Unixish enough environment
 installed.  The configure and Makefile don't really do anything but copy
 the cccl script, though.
 
 Usage
 -----
 cccl will take it's command line parameters and convert the command line
-parameters to something understood by cl or link.  It also attempts to
-determine which program is best suited for your command line.  If you are 
-compiling code, it invokes cl.  If you are linking object files, it will
-invoke link.  
+parameters to something understood by cl.exe for both compiling and linking.
 
-cccl will display the command line it is invoking before invoking it.
+cccl can display the command line it is invoking before invoking by passing the
+--cccl-verbose option or setting the environment variable V=1.
 
-cccl assumes both cl and link are in your path.
+cccl assumes cl.exe are in your path.
 
-cccl currently understands and converts the following command line parameters:
-  -ansi
-  -c
-  -g[n]			[NOTE: cl only supports one debug level]
-  -L<libpath> 
-  -l<libname>
-  -m386
-  -m486
-  -mpentium
-  -mpentiumpro
-  -o <output file>
-  -pedantic		[NOTE: cl has no equivalent, this is thrown away]
-  
 If cccl sees a C++ file with an extension other than .cpp (i.e. .cc, .C, or
-.cxx), then cccl will prepend a "/Tp" option to the cl command line to force
-cl to process it as a C++ source file.
+.cxx), then cccl will prepend a "/Tp" option to the cl.exe command line to force
+cl.exe to process it as a C++ source file.
 
 Other command line parameters are passed unchanged.
 
