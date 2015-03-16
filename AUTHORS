@@ -1,5 +1,12 @@
 cccl was created by:
-  Geoffrey Wossum (gwossum@acm.org)
+  Geoffrey Wossum <gwossum@acm.org>
 
 The following people have contributed to cccl:
-  William Fulton
+  Alin Serdean <aserdean@cloudbasesolutions.com>
+  Geoffrey Wossum <gwossum@acm.org>
+  Gurucharan Shetty <gshetty@nicira.com>
+  Joe Stringer <joestringer@nicira.com>
+  Remko Tronçon <git@el-tramo.be>
+  William S Fulton <wsf@fultondesigns.co.uk>
+
+A full list of contributors are available in the Git logs.
