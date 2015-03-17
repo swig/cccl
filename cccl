@@ -175,24 +175,41 @@ EOF
             clopt+=("${slash}LD")
         ;;
 
+    -*)
+        # Remaining '-' options are passed to the compiler
+        if test x$optarg != x ; then
+            clopt+=("${slash}${1:1}=$optarg")
+        else
+            clopt+=("${slash}${1:1}")
+        fi
+        ;;
+
     *.cc | *.cxx | *.C)
         # C++ source file with non .cpp extension, make sure cl understand 
         # that it is C++
         clopt+=("${slash}Tp$1")
         ;;
 
-    /*)
-        # All / options are passed to the linker
-        linkopt+=("${slash}${1:1}")
+    /link)
+        # Same behaviour as cl - all options after /link are linker options
+        shift
+        while test $# -gt 0; do
+            case "$1" in
+            /*)
+                linkopt+=("${slash}${1:1}")
+                ;;
+
+            *)
+                linkopt+=("$1")
+                ;;
+            esac
+            shift
+        done
         ;;
 
-    -*)
-        # All - options are passed to the compiler
-        if test x$optarg != x ; then
-            clopt+=("${slash}${1:1}=$optarg")
-        else
-            clopt+=("${slash}${1:1}")
-        fi
+    /*)
+        # All '/' options are assumed to be for cl and are passed through
+        clopt+=("${slash}${1:1}")
         ;;
 
     *)
