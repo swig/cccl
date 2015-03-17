@@ -22,7 +22,8 @@
 usage()
 {
     cat <<EOF
-Usage: cccl [--cccl-muffle] [--cccl-verbose] [--help] [--version] [OPTIONS]
+Usage: cccl [--cccl-link] [--cccl-muffle] [--cccl-verbose] [--help] [--version]
+       [OPTIONS]
 
 cccl is a wrapper around Microsoft's cl.exe compiler.  It translates parameters
 given by [OPTIONS] that Unix cc understands into parameters that cl understands.
@@ -65,6 +66,20 @@ while test $# -gt 0; do
     --help)
         usage
         exit 0
+        ;;
+
+    --cccl-link)
+        # One single option for the linker
+        shift
+        case "$1" in
+        /*)
+            linkopt+=("${slash}${1:1}")
+            ;;
+
+        *)
+            linkopt+=("$1")
+            ;;
+        esac
         ;;
 
     --cccl-muffle)
