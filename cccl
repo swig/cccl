@@ -139,12 +139,13 @@ EOF
         case "$1" in
         *.o | *.obj)
             clopt+=("${slash}Fo$1")
-        ;;
+            ;;
 
         *.exe | *.dll | *.pyd)
             clopt+=("${slash}Fe$1")
+            ;;
+        esac
         ;;
-        esac;;
 
     -pedantic)
         #ignore pedantic
@@ -171,8 +172,8 @@ EOF
         ;;
 
     -shared)
-            shared_index=${#clopt[@]}
-            clopt+=("${slash}LD")
+        shared_index=${#clopt[@]}
+        clopt+=("${slash}LD")
         ;;
 
     -*)
