@@ -1,5 +1,5 @@
 AC_INIT(cccl)
-AM_INIT_AUTOMAKE(cccl, 0.03)
+AM_INIT_AUTOMAKE(cccl, 1.0)
 AC_PROG_INSTALL
 
 dnl doxygen is used to create the documentation

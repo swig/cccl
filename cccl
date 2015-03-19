@@ -93,7 +93,7 @@ while test $# -gt 0; do
 
     --version)
         cat <<EOF
-cccl 0.03 (modified for SWIG)
+cccl 1.0
 EOF
         exit 0;
         ;;
