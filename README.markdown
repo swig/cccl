@@ -1,137 +1,120 @@
 # cccl
-
-## Authors
-Geoffrey Wossum (gwossum@acm.org)
-[http://cccl.sf.net](http://cccl.sf.net)
+cc to cl compiler wrapper
 
 ## Introduction
-cccl is a wrapper around Microsoft Visual C++'s cl.exe.  It
-converts Unix compiler parameters into parameters understood by cl.exe.
-cccl's main use is for using Unix build processes with Microsoft compilers.
-Using cccl in conjunction with ports of Unix utilities, it is possible to 
-build many Unix packages using MSVC, without modifying the build process.
 
-### Full Documentation
-Documentation, including how to use autotools with MSVC by using cccl, is
-now included!  The documentation is in HTML and can be found in 
-doc/html/index.html.
+cccl is a wrapper around Microsoft's cl.exe C/C++ compiler.  It converts
+tradional Unix cc command line parameters to their cl.exe equivalents.
+
+The main use for cccl is for using Unix build processes with the Microsoft
+C/C++ compiler.  Using cccl in conjunction with ports of Unix utilities, it is
+possible to build many Unix packages using MSVC, without modifying the build
+process.  This is especially useful if you want to use GNU autotools
+(autoconf/automake/libtool) with MSVC.
 
 ### Motivation
-Why would I build a wrapper script to make cl.exe act like gcc, when
-gcc is available for Windows?  I had a cross-platform project that I wanted
-to use autoconf/automake/libtool for the build process.  The obvious thing
-to do would have been to use gcc on all platforms.  But on Windows I was
-using some third-party libraries that didn't work with gcc, only with 
-MSVC.  By creating cccl, I was able to use the same build process with the
-MSVC compiler, with only minimal changes to the build process.  This 
-saved a great deal of time.
 
-Even though it's extremely simple and stupid, it saved me a lot of hassle
-in the build process.  I tried to look for an already existing program to
-do this, but none existed (that I could find).  I decided that since it 
-proved so useful to me, I should release it to the world.
+Why would one use a wrapper script to make cl.exe act like gcc, when gcc is
+available for Windows?
 
-### Installing
-cccl requires ports of the following Unix utilities:
-  - bash
-  - sed
-  - tr
+There are a few reasons but the primary reason is usually to support 
+cross-platform projects that need to use autoconf/automake/libtool for the 
+build process.  The obvious thing might be to use gcc on all platforms.  But on 
+Windows, not all third-party libraries work with gcc, some only work with MSVC.  
+cccl allows one to use the same build process with the MSVC compiler, but with 
+only minimal changes to the build process.
 
-cccl is known to work on Cygwin and MinGW.
+Even though it's a somewhat simple approach, the original author, Geoffery
+Wossum, wrote the initial version of cccl and released it for others to use as
+it saved him a lot of hassle in the build process.
 
-You can either copy the cccl script to somewhere on your system, or you can
-do a `./configure && make install` if you have a Unixish enough environment
-installed.  The configure and Makefile don't really do anything but copy
-the cccl script, though.
+### Usage Overview
 
-## Usage
-cccl will take it's command line parameters and convert the command line
-parameters to something understood by cl.exe for both compiling and linking.
+cccl assumes cl.exe is in your path. cccl is run the same way that a Unix C or
+C++ compiler is used. Below shows usage to compile a simple C program:
 
-cccl can display the command line it is invoking before invoking by passing the
---cccl-verbose option or setting the environment variable V=1.
+```
+$ cccl main.c -o runme.exe
+main.c
+```
 
-cccl assumes cl.exe are in your path.
+By default cccl quietly passes the converted command line options to cl.exe.
+These can be displayed by using the `--cccl-verbose` option and can be useful 
+for analysing compilation problems, for example:
 
-If cccl sees a C++ file with an extension other than .cpp (i.e. .cc, .C, or
-.cxx), then cccl will prepend a `/Tp` option to the cl.exe command line to force
-cl.exe to process it as a C++ source file.
-
-Other command line parameters are passed unchanged.
-
-end of README
-
-
-## Introduction to cccl (cc to cl.exe)
-
-cccl makes MSVC's cl.exe act like Unix cc's by converting cc command line
-parameters into one's cl.exe understands.  This is especially useful if
-you want to use GNU autotools (autoconf/automake/libtool) with MSVC.
-
-### Obtaining cccl
-
-The cccl web page is at [http://cccl.sf.net](http://cccl.sf.net).
-The cccl SourceForge project page is at 
-[http://sf.net/projects/cccl](http://sf.net/projects/cccl).
+```
+$ cccl --cccl-verbose main.c -o runme.exe
+cl "/nologo" "main.c" "/Ferunme.exe"
+main.c
+```
 
 ### Getting Started
 
-First, you'll want to [install cccl](#installing-cccl).  Then, you'll 
-probably want to learn [using autotools and MSVC](#autotools-and-msvc) together.
+First, you'll want to [install cccl](#installing-cccl).  Then, you'll probably
+want to learn [using autotools and MSVC](#autotools-and-msvc) together.
 
 
 ## Installing cccl
 
+### Quick Overview
+
+cccl is known to work on Cygwin and MinGW.
+
+You can either copy the cccl script to somewhere on your system, or you can do
+a `./configure && make install` if you have a Unixish enough environment
+installed.  The configure and Makefile don't really do anything but copy the
+cccl script, though.
+
 ### Prerequisites
 
-cccl is a bash shell script which utilizes sed.  Therefore, you will need
-at the very least Windows versions of bash and sed.  The easiest and best
-source of these (as well as many other Unix tools) is RedHat's Cygwin.
-Go to the (http://sources.redhat.com/cygwin)[Cygwin website] to
-download and install Cygwin.  If your planning on using cccl to build 
-autotools projects, make sure that you install autoconf, automake, and 
-libtool as well.  
+cccl uses and hence requires ports of the following Unix utilities:
+  - bash
+  - sed
+  - tr
 
-Some older distributions of Cygwin did not include libtool, so you'll 
-need to install it from source.  You can use Cygwin's gcc to compile 
-the libtool (it's just compiling a support library you won't use in
-your MSVC projects).  Make sure that libtool installs to the same prefix
-as autoconf and automake (most likely /usr).  Use the `--prefix=` option
-in libtool's configure script to make sure this happens.  Otherwise,
-you'll run into problems later when you try to build your autotools
-project.
+cccl is a bash shell script which makes use of these utilities.  Therefore, you
+will need at the very least a Windows versions of these utilities.  The easiest
+and best source of these (as well as many other Unix tools) is RedHat's Cygwin.
+Go to the [Cygwin website](https://cygwin.com/) to download and install Cygwin.
+If you are planning on using cccl to build autotools projects, make sure that
+you install autoconf, automake and libtool as well. Alternatively install
+[MinGW](http://mingw.org/) instead of Cygwin.
 
 ### Installing cccl
 
-Once you have a working Cygwin environment, you have to options.  You may
-either manually copy the *cccl* file to somewhere in your path, since
-it's just a script.  
+Once you have a working Cygwin or MinGW environment, you have two options.  You
+may either manually copy the *cccl* file to somewhere in your path, since it's
+just a script.
 
-Alternatively, you may do the normal Unix `./configure ; make ; make install` 
+Alternatively, you may do the normal Unix `./configure && make && make install`
 routine.
 
 ### Setting Up Your Path
 
-Obviously you'll want *cccl* to be in your path.  Since cccl directly
-invokes *cl.exe* and *link.exe*, you'll need to make sure that these
-are in your path as well.  This may have been done for you Visual Studio
-install.  If not, there may be a file called *VCVARS32.BAT* which can
-be run from an MS-DOS command prompt to set your path.  However, you'll
-probably want *cl.exe* and *link.exe* to be permanantly in your path.
-If they're not there already, refer to the documentation included with
-Visual Studio on how to do this, as the process differs on each
-Windows variant.
+Obviously you'll want *cccl* to be in your path.  Since cccl directly invokes 
+*cl.exe*, you'll need to make sure it is in your path as well.  This may have 
+been done for you during your Visual Studio install.  If not, there should be a 
+file called *vcvars32.bat* or *vcvarsall.bat* which can be run from an MS-DOS 
+command prompt to set your path.  Visual Studio usually installs a menu item to 
+run a *Visual Studio Command Prompt* and is commonly under the *Visual Studio 
+Tools* menu. This invokes one of the aforementioned batch files.  Refer to the 
+documentation included with Visual Studio for more details about running the 
+Visual Studio command line tools.  Note that the GNU linker is also called 
+*link.exe* and is usually present in Cygwin and MinGW, but this shouldn't be a 
+problem as cccl does not invoke the linker directly, it relies on *cl.exe* to  
+invoke the appropriate Microsoft linker.
 
 ## Autotools and MSVC
 
-Autotools (autoconf, automake, libtool) and MSVC were never made to work
-together, but with cccl you can make them become reluctant friends.  If you 
-don't already have Cygwin and cccl installed, [click here](#install). 
+Autotools (autoconf, automake, libtool) and MSVC were never originally made to 
+work together, but with cccl you can make them become reluctant friends.
 
-### configure.in
+### configure.ac
 
-In order to use autoconf and MSVC, make sure the following lines are in
-your configure.in:
+Autoconf requires a file called *configure.ac*, which on legacy projects may
+still be called *configure.in*.  In order to use autoconf and MSVC, make sure 
+the following lines are in your *configure.ac* file:
+
 ```
 AC_CANONICAL_SYSTEM
 AC_CYGWIN
@@ -139,107 +122,305 @@ AC_OBJEXT
 AC_EXEEXT
 ```
 
-If your configure.in contains a reference to `AM_PROG_LIBTOOL`, add the
-following line *before* `AM_PROG_LIBTOOL`
+If your *configure.ac* file contains a reference to `AM_PROG_LIBTOOL`, add the
+following line *before* `AM_PROG_LIBTOOL`:
+
 ```
 AC_LIBTOOL_WIN32_DLL
 ```
 
 ### Makefile.am
 
-Believe it or not, your Makefile.am's will probably not require any
+Believe it or not, your *Makefile.am* files will probably not require any 
 changes to work.
 
 #### Convenience Libraries
 
-Convenience libraries (noinst *.a targets) work fine without any changes.
+Convenience libraries (noinst .a targets) work fine without any changes.
 
 #### Executable Targets
 
-No changes required.  However, you may want to create a resource file
-to add the explorer icon to the .exe file.  
+No changes required.  However, you may want to create a resource file to add
+the explorer icon to the .exe file.
 
-TODO: Add link to page explaining how to do this.
+#### Static Libraries
 
-#### Static Libraries (*.lib)
-
-autotools can build static libraries fine.  However, you will probably
-want the output file to have a different name under Windows (super.lib vs.
-libsuper.a).  You can accomplish this using some automake conditionals.
+Autotools can build static libraries (.lib files) fine.  However, you will
+probably want the output file to have a different name under Windows (super.lib
+vs.  libsuper.a).  You can accomplish this using some automake conditionals.
 
 #### Dynamic Link Libraries (*.dll)
 
-autotools really doesn't support this very well 
-(at least not in 2.13/1.4/1.3.5).  You'll probably just have to write
-the rules to do this by hand, and select them using an automake 
-conditional.
+Older versions of the autotools (2.13 and earlier) didn't really support
+dynamic link libraries (.dll files) very well. Newer versions of Libtool have
+much improved Windows support for supporting dynamic link libraries.
 
 ### Building Your Projects
 
-Once you've generated your configure script and Makefiles by running
-aclocal, autoheader, autoconf, and automake, you're ready to compile.
+Once you've generated your configure script and Makefiles by running aclocal,
+autoheader, autoconf and automake, you're ready to compile.
 
-Before you run the configure script (from with Cygwin, of course), you need
-to set the compiler environment variables to use cccl.
+Before you run the configure script (from within Cygwin or MinGW, of course),
+you'll need to set the compiler and linker environment variables to use cccl.
 
 ```sh
 export CC=cccl
 export CXX=cccl
+export LD=cccl
 ```
 
-If you have any C++ that uses exceptions (any code that uses the STL 
-uses exceptions), you'll need to set CXXFLAGS properly to:
+You may not need to set all these depending on whether your code base is just C
+or C++ and how the linker is invoked, but it is safest to set all three to 
+begin with.
+
+The options in Visual C++ are numerous and have changed over the years but have 
+got a bit simpler more recently.  Unlike gcc, the default options are not all 
+that good though and often need tweaking. The good news is that the compiler 
+will often tell you if you need to add an option, for example if you have C++ 
+code that uses exceptions (any code that uses the STL uses exceptions), you 
+should see a warning:
+
+```
+foo.cxx(10) : warning C4530: C++ exception handler used, but unwind semantics 
+are not enabled. Specify /EHsc
+```
+
+Modern versions require `/EHsc`, but older versions require `/GX`.  Depending 
+on the version of cl.exe, you may need to add `/GR` to enable run-time type 
+information (RTTI), for example:
 
 ```sh
-export CXXFLAGS="/GR /GX"
+export CXXFLAGS="/EHsc"
 ```
 
-The `/GR` and `/GX` options are unrecognized by cccl and therefore will
-be passed directly to cl.exe.
+or
+
+```sh
+export CXXFLAGS="/GX /GR"
+```
+
+The options starting with `/` such as `/EHsc` and `/GX` are unrecognized by
+cccl and are therefore passed directly to cl.exe.
 
 Now, cross your fingers, and `./configure` and `make`.
 
+The [Automake silent 
+rules](https://www.gnu.org/software/automake/manual/html_node/Automake-Silent-Rules.html)
+can control the verbosity of the output via the `V` variable. When `make V=1` 
+is used, cccl will display the options passed to cl.exe as if `cccl --cccl-verbose`
+was used.
 
-## cccl Usage
+## Usage
 
-cccl is a wrapper around Microsoft's cl.exe.  It converts traditional
-Unix cc command line parameters to their cl.exe equivalents.
+cc on Unix serves as a front end to the compiler and the linker.  Microsoft's 
+cl.exe can operate the same but most usage is as a compiler.
 
-Also, cc on Unix serves as a front end to the compiler and the linker.  
-cl.exe, however, is mainly on the compiler (it does support a limited
-compile and link).  The Microsoft linker, link.exe, usually must be
-invoked explicitly.  cccl attempts to choose whether it should invoke
-cl.exe or link.exe, adjusting the command line parameters as appropriate.
-It probably does not do a very good job of this, but it seems to work
-in most common cases.  Trying to compile and link in a single step will
-probably make cccl very confused.
+### Compiling
+
+Any traditional cc options that cccl does not convert into options for cl.exe
+are passed unchanged to cl.exe. So options starting with `-` may or may not
+be converted.  Any `/` options are expected to be for cl.exe and no attempt
+is made to convert them; they are passed directly to cl.exe unmodified.
+
+If cccl sees a C++ file with an extension other than .cpp (i.e. .cc, .C, or
+.cxx), then cccl will prepend a `/Tp` option to the cl.exe command line to
+force cl.exe to process it as a C++ source file.
+
+### Linking
+
+cl.exe interprets all options after `/link` to be linker options. cccl may
+convert some options and if necessary pass them as a linker option by adding 
+them after `/link`.  There are a few approaches to passing options to the
+linker directly. The first is to specify them as you would with cl.exe where
+everything after `/link` is a linker option:
+
+```
+cccl main.c /W3 /link /LTCG /INCREMENTAL:NO
+```
+
+The second approach is to use the cccl option `--cccl-link` which passes just
+the single next option to the linker. If using this approach, the above example
+can be rewritten as follows:
+
+```
+cccl main.c --cccl-link /LTCG /W3 --cccl-link /INCREMENTAL:NO
+```
+
+Note that the first approach requires the compiler option `/W3` to be placed
+before `/link`, whereas with the second approach the compiler option `/W3` can
+be placed either before, after or as shown above right in between two linker
+options.
+
+Both of the above examples will thus invoke cl.exe as follows:
+
+```
+cl main.c /W3 /link /LTCG /INCREMENTAL:NO
+```
+
+In the MinGW environment, `/` options are not supported very well and so are
+instead converted to `-` options and hence cccl will invoke cl.exe as
+follows:
+
+```
+cl main.c -W3 -link -LTCG -INCREMENTAL:NO
+```
+
+### Verbosity
+
+Visual C++ is unusually verbose for a compiler and displays the names of the
+files it is compiling and sometimes "Creating library" and similiar messages.
+For example, default output for compiling two or more files is shown below:
+
+```
+$ cccl main.c stuff.c -o runme.exe
+main.c
+stuff.c
+Generating Code...
+```
+
+cccl supports the `--cccl-muffle` option which parses the output from cl.exe
+and suppresses this extra verbiage. Adding this option to the example results
+in silent output like traditional Unix compilers:
+
+```
+$ cccl main.c stuff.c -o runme.exe --cccl-muffle
+```
+
+The `--cccl-verbose` option will display exactly how cl.exe is invoked:
+
+```
+$ cccl main.c stuff.c -o runme.exe --cccl-verbose
+cl "/nologo" "main.c" "stuff.c" "/Ferunme.exe"
+main.c
+stuff.c
+Generating Code...
+```
+
+### Environment
+
+cccl supports the `CCCL_OPTIONS` environment variable. The contents of the 
+environment variable are treated as additional command line options to cccl. 
+This can be handy for adding additional options or tweaking the verbosity 
+options without changing the build system.  For example:
+
+```
+$ export CCCL_OPTIONS="--cccl-muffle --cccl-verbose /W3"
+$ cccl -O2 main.c
+cl "/nologo" "/W3" "/O2" "main.c"
+```
+
+and if `CCCL_OPTIONS` is not set, then the above is the same as:
+
+```
+$ cccl --cccl-muffle --cccl-verbose /W3 -O2 main.c
+cl "/nologo" "/W3" "/O2" "main.c"
+```
+
+There is one notable difference compared to using `CCCL_OPTIONS` and that is 
+the handling of spaces. You can't use spaces in the actual options, for example
+`-I"My Headers"`.  For this to work, you must pass it as a real cccl command
+line option.
 
 ### Options
 
-The following options are understood by cccl:
+The following Unix compiler cc/gcc options are understood by cccl:
 
  - **-ansi** Converts to cl.exe's **/Za**
  - **-c** Converts to cl.exe's **/C**
- - **-g**[0-9] Converts to cl.exe's **/Zi** (cl.exe only supports one 
-      debug level)
- - **-L_path_** Converts to link.exe's **/LIBPATH:_path_**
+ - **-g**[0-9] Converts to cl.exe's **/Zi**
+ - **-O0** Converts to cl.exe's **/Ot** optimization option
+ - **-L_path_** Converts to linker option **/LIBPATH:_path_**
  - **-l_library_** Converts to **lib_library_.lib**
  - **-m386** Converts to cl.exe's **/G3**
  - **-m486** Converts to cl.exe's **/G4**
  - **-mpentium** Converts to cl.exe's **/G5**
  - **-mpentiumpro** Converts to cl.exe's **/G6**
- - **-o** If cccl decides to invoke cl.exe, **/Fo** will be given to cl.exe
-   if the output file is an object file, otherwise **/Fe** will be given
-   to cl.exe.  If cccl decides to run link.exe, then the output file
-   will be given using link.exe's **/out**: option.
- - **-pedantic** Ignored, cl.exe does not support any equivalent.
- - **\*.(cc|cxx|C)** C++ source file, **/Tp** option given to cl.exe
+ - **-o** is converted to **/Fo** for object files and **/Fe** for executables
+   and dlls
+ - **-pedantic** Removed/ignored, cl.exe does not support any equivalent
+ - **-W** Removed/ignored
+ - **-fno-strict-aliasing** Removed/ignored
+ - **-isystem** Converted to **/I**
+ - **-MT** Due to conflict with cl.exe's **/MT** option, there is no support
+   and cccl exits
+ - **-mno-cygwin** Removed/ignored
+ - **-shared** Converts to cl.exe's **/LD** or **/LDd** if -g is used
+ - **\*.(cc|cxx|C)** C++ source file is passed using **/Tp**
 
-All other options are passed untouched to either cl.exe or link.exe
+The following are cccl specific options:
+ - **--help** Displays cccl help
+ - **--cccl-link** Passes the following option as a linker option
+ - **--cccl-muffle** Removes cl.exe's verbiage (file names being compiled etc) 
+   from being displayed
+ - **--cccl-verbose** Displays how cl.exe is invoked
+ - **--cccl-version** Displays cccl's version string
 
-cccl will give options to cl.exe to correctly compile C++ source files
-even if they don't have a .cpp extension (.cc, .cxx, or .C).
+All other `-` options are passed untouched to cl.exe.  All `/` options are
+passed unmodified to cl.exe.  All other non-options (file/path names) are
+also passed on unmodified.
 
-If any object file (.o, .obj) or library file (.a, .lib) is seen in the 
-command line, cccl will invoke link.exe.
+## History
+
+### Version 0.01
+
+Geoffrey Wossum (gwossum@acm.org) first wrote cccl as a Bourne shell script and
+released it under the GPL license at [http://cccl.sf.net](http://cccl.sf.net)
+on 9 August 2001.  The original cccl SourceForge project page is located at
+[http://sf.net/projects/cccl](http://sf.net/projects/cccl).
+
+### Version 0.03
+
+This version contained a few patches and was released in January 2003 and was
+the last version released on Sourceforge.
+
+### 2003 to 2015
+
+The original was forked a few times. The known public forks are:
+
+* SWIFT - http://swift.im/git/swift in the autoconf/cccl directory which was
+  subsequently deleted
+* Open vSwitch
+  https://github.com/openvswitch/ovs/commits/master/build-aux/cccl which
+  built on top of the SWIFT fork.
+* BalaBit - git://git.balabit.hu/folti/cccl.git described in a  
+[Compiling autoconf/make projects under msvc](https://folti.blogs.balabit.com/2009/08/compiling-autoconfmake-projects-under-msvc-part-one/).  
+The BalaBit fork is a lot more complex than the others and performance is
+consequently somewhat slower.
+
+### Version 1.0
+
+William Fulton had been using cccl with some unpublished modifications for
+building [SWIG](http://www.swig.org) releases for many years. In 2015, these
+were made public and merged with the Open vSwitch fork and released on Github
+at http://github.com/swig/cccl under the newer GPL version 3 license.
+
+The documentation was also converted to Markdown format and brought up to date.
+
+#### New Features
+
+The main improvements in version 1.0 over the original cccl release 0.03 are:
+
+* Support for compiling and linking in a single step works with a mix of C, C++
+  and object files as inputs.
+* Support for spaces in paths, such as include paths and spaces in file names.
+* Support for creating dynamic link libraries (dlls).
+* Support for running under MinGW.
+* Adding control of output verbosity.
+* Simpler setup configuration by avoiding using link.exe directly, which
+  previously may have incorrectly invoked the GNU linker.
+
+### Future
+
+The move to Github is hoped to inject some life into the project on a modern
+open source platform as the Sourceforge project had been defunct for 12 years.
+
+The goal is for cccl to remain simple and to keep performance slow downs to a
+minimum.  Pull requests for bug fixes and improvements meeting these goals are
+encouraged.
+
+## See Also
+
+[wgcc](https://sourceforge.net/projects/interix-wgcc/) is another cccl like
+tool for Interix but was superceded by
+[parity](https://github.com/mduft/parity).
 
