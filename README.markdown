@@ -1,9 +1,9 @@
 # cccl
-cc to cl compiler wrapper
+Unix cc compiler to Microsoft's cl compiler wrapper at https://github.com/swig/cccl
 
 ## Introduction
 
-cccl is a wrapper around Microsoft's cl.exe C/C++ compiler.  It converts
+cccl is a wrapper around Microsoft's cl.exe Visual C++ compiler.  It converts
 tradional Unix cc command line parameters to their cl.exe equivalents.
 
 The main use for cccl is for using Unix build processes with the Microsoft
@@ -51,7 +51,7 @@ main.c
 ### Getting Started
 
 First, you'll want to [install cccl](#installing-cccl).  Then, you'll probably
-want to learn [using autotools and MSVC](#autotools-and-msvc) together.
+want to learn using [autotools and MSVC](#autotools-and-msvc) together.
 
 
 ## Installing cccl
@@ -61,9 +61,9 @@ want to learn [using autotools and MSVC](#autotools-and-msvc) together.
 cccl is known to work on Cygwin and MinGW.
 
 You can either copy the cccl script to somewhere on your system, or you can do
-a `./configure && make install` if you have a Unixish enough environment
-installed.  The configure and Makefile don't really do anything but copy the
-cccl script, though.
+a `./bootstrap && ./configure && make install` from the source if you have a 
+Unixish enough environment installed.  The configure and Makefile don't really 
+do anything but copy the cccl script, though.
 
 ### Prerequisites
 
@@ -83,11 +83,9 @@ you install autoconf, automake and libtool as well. Alternatively install
 ### Installing cccl
 
 Once you have a working Cygwin or MinGW environment, you have two options.  You
-may either manually copy the *cccl* file to somewhere in your path, since it's
-just a script.
-
-Alternatively, you may do the normal Unix `./configure && make && make install`
-routine.
+may manually copy the *cccl* file to somewhere in your path, since it's just a 
+script. Alternatively, you may do the normal Unix 
+`./bootstrap && ./configure && make && make install` routine.
 
 ### Setting Up Your Path
 
@@ -101,7 +99,7 @@ Tools* menu. This invokes one of the aforementioned batch files.  Refer to the
 documentation included with Visual Studio for more details about running the 
 Visual Studio command line tools.  Note that the GNU linker is also called 
 *link.exe* and is usually present in Cygwin and MinGW, but this shouldn't be a 
-problem as cccl does not invoke the linker directly, it relies on *cl.exe* to  
+problem as cccl does not invoke the linker directly, it relies on *cl.exe* to 
 invoke the appropriate Microsoft linker.
 
 ## Autotools and MSVC
@@ -187,13 +185,13 @@ are not enabled. Specify /EHsc
 
 Modern versions require `/EHsc`, but older versions require `/GX`.  Depending 
 on the version of cl.exe, you may need to add `/GR` to enable run-time type 
-information (RTTI), for example:
+information (RTTI). Use:
 
 ```sh
 export CXXFLAGS="/EHsc"
 ```
 
-or
+for new versions or for older versions:
 
 ```sh
 export CXXFLAGS="/GX /GR"
@@ -220,7 +218,9 @@ cl.exe can operate the same but most usage is as a compiler.
 Any traditional cc options that cccl does not convert into options for cl.exe
 are passed unchanged to cl.exe. So options starting with `-` may or may not
 be converted.  Any `/` options are expected to be for cl.exe and no attempt
-is made to convert them; they are passed directly to cl.exe unmodified.
+is made to convert them; they are passed directly to cl.exe unmodified. 
+Further details about option conversions are in the [Options](#options) 
+section.
 
 If cccl sees a C++ file with an extension other than .cpp (i.e. .cc, .C, or
 .cxx), then cccl will prepend a `/Tp` option to the cl.exe command line to
@@ -230,9 +230,9 @@ force cl.exe to process it as a C++ source file.
 
 cl.exe interprets all options after `/link` to be linker options. cccl may
 convert some options and if necessary pass them as a linker option by adding 
-them after `/link`.  There are a few approaches to passing options to the
-linker directly. The first is to specify them as you would with cl.exe where
-everything after `/link` is a linker option:
+them after `/link`.  There are a few approaches to passing additional options 
+to the linker directly. The first is to specify them as you would with cl.exe 
+where everything after `/link` is a linker option:
 
 ```
 cccl main.c /W3 /link /LTCG /INCREMENTAL:NO
@@ -309,17 +309,16 @@ $ cccl -O2 main.c
 cl "/nologo" "/W3" "/O2" "main.c"
 ```
 
-and if `CCCL_OPTIONS` is not set, then the above is the same as:
+and assuming `CCCL_OPTIONS` is not set, then the above is the same as:
 
 ```
 $ cccl --cccl-muffle --cccl-verbose /W3 -O2 main.c
 cl "/nologo" "/W3" "/O2" "main.c"
 ```
 
-There is one notable difference compared to using `CCCL_OPTIONS` and that is 
-the handling of spaces. You can't use spaces in the actual options, for example
-`-I"My Headers"`.  For this to work, you must pass it as a real cccl command
-line option.
+There is one notable difference using `CCCL_OPTIONS` compare to using actual options and 
+that is the handling of spaces within options, for example `-I"My Headers"`. For this to 
+work, you must pass it as a real cccl command line option and `CCCL_OPTIONS` can't be used.
 
 ### Options
 
@@ -377,22 +376,22 @@ the last version released on Sourceforge.
 
 The original was forked a few times. The known public forks are:
 
-* SWIFT - http://swift.im/git/swift in the autoconf/cccl directory which was
-  subsequently deleted
+* SWIFT http://swift.im/git/swift in the autoconf/cccl directory which was
+  subsequently deleted.
 * Open vSwitch
   https://github.com/openvswitch/ovs/commits/master/build-aux/cccl which
   built on top of the SWIFT fork.
-* BalaBit - git://git.balabit.hu/folti/cccl.git described in a  
-[Compiling autoconf/make projects under msvc](https://folti.blogs.balabit.com/2009/08/compiling-autoconfmake-projects-under-msvc-part-one/).  
-The BalaBit fork is a lot more complex than the others and performance is
-consequently somewhat slower.
+* BalaBit which is described in a blog titled [Compiling autoconf/make projects under msvc](https://folti.blogs.balabit.com/2009/08/compiling-autoconfmake-projects-under-msvc-part-one/).
+  The BalaBit fork is a lot more complex than the others and performance is consequently somewhat slower.
+  The Git repo is at git://git.balabit.hu/folti/cccl.git.
 
 ### Version 1.0
 
 William Fulton had been using cccl with some unpublished modifications for
-building [SWIG](http://www.swig.org) releases for many years. In 2015, these
-were made public and merged with the Open vSwitch fork and released on Github
-at http://github.com/swig/cccl under the newer GPL version 3 license.
+testing and building [SWIG](http://www.swig.org) releases for many years. 
+In 2015, these were made public and merged with the Open vSwitch fork and 
+released on Github at https://github.com/swig/cccl under the newer GPL 
+version 3 license.
 
 The documentation was also converted to Markdown format and brought up to date.
 
@@ -411,12 +410,13 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 
 ### Future
 
-The move to Github is hoped to inject some life into the project on a modern
-open source platform as the Sourceforge project had been defunct for 12 years.
+The move to Github at https://github.com/swig/cccl is hoped to inject some life 
+into the project on a modern open source platform as the Sourceforge project 
+had been defunct for 12 years.
 
-The goal is for cccl to remain simple and to keep performance slow downs to a
-minimum.  Pull requests for bug fixes and improvements meeting these goals are
-encouraged.
+The goal is for cccl to remain simple and lightweight so that the performance 
+degradation added by the wrapper is kept small. Pull requests from users for 
+bug fixes and improvements that meet these goals are encouraged.
 
 ## See Also
 
