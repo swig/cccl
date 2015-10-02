@@ -186,7 +186,7 @@ EOF
     -mno-cygwin)
         ;;
 
-    -shared)
+    -shared | -dll)
         shared_index=${#clopt[@]}
         clopt+=("${slash}LD")
         ;;
