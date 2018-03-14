@@ -405,6 +405,10 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 * Simpler setup configuration by avoiding using link.exe directly, which
   previously may have incorrectly invoked the GNU linker.
 
+### Version 1.1 (Work in progress, not released yet).
+
+* Convert -dll to /LD to achieve compatibility with libtool.
+
 ### Future
 
 The move to Github at https://github.com/swig/cccl is hoped to inject some life 
