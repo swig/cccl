@@ -111,13 +111,10 @@ work together, but with cccl you can make them become reluctant friends.
 
 Autoconf requires a file called *configure.ac*, which on legacy projects may
 still be called *configure.in*.  In order to use autoconf and MSVC, make sure 
-the following lines are in your *configure.ac* file:
+the following line is in your *configure.ac* file:
 
 ```
-AC_CANONICAL_SYSTEM
-AC_CYGWIN
-AC_OBJEXT
-AC_EXEEXT
+AC_CANONICAL_HOST
 ```
 
 If your *configure.ac* file contains a reference to `AM_PROG_LIBTOOL`, add the
