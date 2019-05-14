@@ -356,6 +356,17 @@ All other `-` options are passed untouched to cl.exe.  All `/` options are
 passed unmodified to cl.exe.  All other non-options (file/path names) are
 also passed on unmodified.
 
+### clang-cl
+
+clang-cl.exe emulates the compiler options of cl.exe and is MSVC ABI compatible.
+
+Note: clang.exe interface takes unix like flags, but autotools gives msvc like options
+(eg: -link -export:foo) even when it's clang.exe. Also, clang-cl.exe adds several flags
+for MSVC compatibility to the clang compiler backend that clang.exe doesn't. Therefore,
+in autotools using clang-cl.exe with cccl is easier than using clang.exe.
+
+To tell cccl to invoke clang-cl, set CCCL=clang-cl
+
 ## History
 
 ### Version 0.01

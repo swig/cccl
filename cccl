@@ -33,7 +33,7 @@ EOF
 slash="-"
 
 # prog specifies the program that should be run cl.exe
-prog=cl
+prog=${CCCL:-cl}
 # opts specifies the command line to pass to the MSVC program
 clopt=("${slash}nologo")
 linkopt=("${slash}link")
