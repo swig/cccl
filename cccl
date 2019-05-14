@@ -30,14 +30,7 @@ given by [OPTIONS] that Unix cc understands into parameters that cl understands.
 EOF
 }
 
-case $MACHTYPE in
-    *-msys)
-        slash="-"
-        ;;
-    *)
-        slash="/"
-        ;;
-esac
+slash="-"
 
 # prog specifies the program that should be run cl.exe
 prog=cl
@@ -166,6 +159,14 @@ EOF
         #ignore pedantic
         ;;
 
+    -Wl*)
+        IFS=',' read -ra linkopt2 <<< "$(echo $1 | sed 's/-Wl,//')"
+        for linkarg in ${linkopt2[@]}
+        do
+            linkopt+=("${linkarg}")
+        done
+        ;;
+
     -W*)
         #ignore warnings
         ;;
@@ -206,26 +207,13 @@ EOF
         clopt+=("${slash}Tp$1")
         ;;
 
-    /link)
+    /link|-link)
         # Same behaviour as cl - all options after /link are linker options
         shift
         while test $# -gt 0; do
-            case "$1" in
-            /*)
-                linkopt+=("${slash}${1:1}")
-                ;;
-
-            *)
-                linkopt+=("$1")
-                ;;
-            esac
+            linkopt+=("$1")
             shift
         done
-        ;;
-
-    /*)
-        # All '/' options are assumed to be for cl and are passed through
-        clopt+=("${slash}${1:1}")
         ;;
 
     *)
