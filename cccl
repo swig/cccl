@@ -159,6 +159,11 @@ EOF
         #ignore pedantic
         ;;
 
+    -rpath)
+        #ignore this arg and the path
+        shift
+        ;;
+
     -Wl*)
         IFS=',' read -ra linkopt2 <<< "$(echo $1 | sed 's/-Wl,//')"
         for linkarg in ${linkopt2[@]}
