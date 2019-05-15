@@ -179,6 +179,11 @@ EOF
         clopt+=("${slash}I$1")
         ;;
 
+    -rpath)
+        #ignore this arg and the path
+        shift
+        ;;
+
     -MT)
         exit 0
         ;;

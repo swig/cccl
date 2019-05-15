@@ -340,6 +340,7 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-MT** Due to conflict with cl.exe's **/MT** option, there is no support
    and cccl exits
  - **-mno-cygwin** Removed/ignored
+ - **-rpath** Removed/ignored
  - **-shared** Converts to cl.exe's **/LD** or **/LDd** if -g is used
  - **\*.(cc|cxx|C)** C++ source file is passed using **/Tp**
 
