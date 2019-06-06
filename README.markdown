@@ -333,6 +333,7 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-mpentiumpro** Converts to cl.exe's **/G6**
  - **-o** is converted to **/Fo** for object files and **/Fe** for executables
    and dlls
+ - **-Wl,<option1>(,<option2>)** Options are passed to the linker
  - **-pedantic** Removed/ignored, cl.exe does not support any equivalent
  - **-W** Removed/ignored
  - **-fno-strict-aliasing** Removed/ignored
