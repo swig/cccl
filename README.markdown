@@ -407,9 +407,12 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 * Simpler setup configuration by avoiding using link.exe directly, which
   previously may have incorrectly invoked the GNU linker.
 
-### Version 1.1 (Work in progress, not released yet).
+### Version 1.1 (22 Aug 2019)
 
 * Convert -dll to /LD to achieve compatibility with libtool.
+* Ignore -rpath option.
+* Previously -Wl options were ignored, now they are passed to the Microsoft
+  linker.
 
 ### Future
 
