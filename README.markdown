@@ -229,7 +229,7 @@ cl.exe interprets all options after `/link` to be linker options. cccl may
 convert some options and if necessary pass them as a linker option by adding 
 them after `/link`.  There are a few approaches to passing additional options 
 to the linker directly. The first is to specify them as you would with cl.exe 
-where everything after `/link` is a linker option:
+where everything after `/link` or `-link` is a linker option:
 
 ```
 cccl main.c /W3 /link /LTCG /INCREMENTAL:NO
@@ -254,7 +254,7 @@ Both of the above examples will thus invoke cl.exe as follows:
 cl main.c /W3 /link /LTCG /INCREMENTAL:NO
 ```
 
-In the MinGW environment, `/` options are not supported very well and so are
+In the MinGW/MSYS environment, `/` options are not supported very well and so are
 instead converted to `-` options and hence cccl will invoke cl.exe as
 follows:
 
@@ -326,7 +326,7 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-g**[0-9] Converts to cl.exe's **/Zi**
  - **-O0** Converts to cl.exe's **/Ot** optimization option
  - **-L_path_** Converts to linker option **/LIBPATH:_path_**
- - **-l_library_** Converts to **lib_library_.lib**
+ - **-l_library_** Converts to **lib_library_.lib** (except **-link**)
  - **-m386** Converts to cl.exe's **/G3**
  - **-m486** Converts to cl.exe's **/G4**
  - **-mpentium** Converts to cl.exe's **/G5**
@@ -346,12 +346,18 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **\*.(cc|cxx|C)** C++ source file is passed using **/Tp**
 
 The following are cccl specific options:
+
  - **--help** Displays cccl help
  - **--cccl-link** Passes the following option as a linker option
  - **--cccl-muffle** Removes cl.exe's verbiage (file names being compiled etc) 
    from being displayed
  - **--cccl-verbose** Displays how cl.exe is invoked
  - **--cccl-version** Displays cccl's version string
+
+The following are Visual C++ options
+
+ - **-link** All remaining options are passed on as linker options
+ - **/link** All remaining options are passed on as linker options
 
 All other `-` options are passed untouched to cl.exe.  All `/` options are
 passed unmodified to cl.exe.  All other non-options (file/path names) are

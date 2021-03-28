@@ -126,6 +126,28 @@ EOF
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
+    -link)
+        # Libtool compatibility which is trying to pass linker options to cl
+        # Same behaviour as cl - all options after -link are linker options
+        shift
+        while test $# -gt 0; do
+            case "$1" in
+            -*)
+                linkopt+=("${slash}${1:1}")
+                ;;
+
+            /*)
+                linkopt+=("${slash}${1:1}")
+                ;;
+
+            *)
+                linkopt+=("$1")
+                ;;
+            esac
+            shift
+        done
+        ;;
+
     -l*)
         lib=`echo "$1" | sed 's/-l//'`
         lib="$lib.lib"
@@ -223,6 +245,10 @@ EOF
         shift
         while test $# -gt 0; do
             case "$1" in
+            -*)
+                linkopt+=("${slash}${1:1}")
+                ;;
+
             /*)
                 linkopt+=("${slash}${1:1}")
                 ;;
