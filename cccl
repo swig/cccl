@@ -184,6 +184,10 @@ EOF
         esac
         ;;
 
+    -std=*)
+        clopt+=("${slash}std:${1:5}")
+        ;;
+
     -pedantic)
         #ignore pedantic
         ;;
