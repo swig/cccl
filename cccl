@@ -186,6 +186,11 @@ EOF
 
     -std=*)
         clopt+=("${slash}std:${1:5}")
+        case "$1" in
+        -std=c++*)
+            clopt+=("${slash}Zc:__cplusplus")
+            ;;
+        esac
         ;;
 
     -pedantic)
