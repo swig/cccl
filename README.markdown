@@ -421,6 +421,11 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 * Previously -Wl options were ignored, now they are passed to the Microsoft
   linker.
 
+### Version 1.2 (24 Apr 2021)
+
+* Support -link option the same as /link
+* Add conversion for -std option
+
 ### Future
 
 The move to Github at https://github.com/swig/cccl is hoped to inject some life 

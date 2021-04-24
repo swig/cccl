@@ -93,7 +93,7 @@ while test $# -gt 0; do
 
     --version)
         cat <<EOF
-cccl 1.1
+cccl 1.2
 EOF
         exit 0;
         ;;
