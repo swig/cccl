@@ -121,7 +121,14 @@ EOF
         clopt+=("${slash}O2")
         ;;
 
-    -L*)
+    -L)
+        shift
+        path=`echo "$1"`
+        linkopt+=("${slash}LIBPATH:$path")
+        ;;
+
+    -L)
+        shift
         path=`echo "$1" | sed 's/-L//'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
@@ -213,6 +220,11 @@ EOF
         ;;
 
     -isystem)
+        shift
+        clopt+=("${slash}I$1")
+        ;;
+
+    -I)
         shift
         clopt+=("${slash}I$1")
         ;;
