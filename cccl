@@ -123,13 +123,13 @@ EOF
 
     -L)
         shift
-        path=`echo "$1"`
+        path=`echo "$1" | sed 's#/\([a-zA-Z]\)#\1:#'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
     -L)
         shift
-        path=`echo "$1" | sed 's/-L//'`
+        path=`echo "$1" | sed 's/-L//' | sed 's#/\([a-zA-Z]\)#\1:#'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
