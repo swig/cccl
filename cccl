@@ -3,7 +3,7 @@
 # cccl
 # Wrapper around MS's cl.exe to make it act more like Unix cc
 #
-# Copyright (C) 2000-2015 by contributors listed in the AUTHORS file.
+# Copyright (C) 2000-2015,2019,2021 by contributors listed in the AUTHORS file.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ while test $# -gt 0; do
 
     --version)
         cat <<EOF
-cccl 1.2
+cccl 1.3
 EOF
         exit 0;
         ;;
@@ -123,13 +123,12 @@ EOF
 
     -L)
         shift
-        path=`echo "$1" | sed 's#/\([a-zA-Z]\)#\1:#'`
+        path=`echo "$1" | sed 's#/\([a-zA-Z]\)/#\1:/#'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
-    -L)
-        shift
-        path=`echo "$1" | sed 's/-L//' | sed 's#/\([a-zA-Z]\)#\1:#'`
+    -L*)
+        path=`echo "$1" | sed 's/-L//' | sed 's#/\([a-zA-Z]\)/#\1:/#'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
@@ -283,8 +282,14 @@ EOF
         ;;
 
     /*)
-        # All '/' options are assumed to be for cl and are passed through
-        clopt+=("${slash}${1:1}")
+        # All '/' options are assumed to be for cl and are passed through,
+        # ... if it isn't a file/folder
+        if test -e "$1"; then
+           path=`echo "$1" | sed 's#/\([a-zA-Z]\)/#\1:/#'`
+           clopt+=("$path")
+        else
+           clopt+=("${slash}${1:1}")
+        fi
         ;;
 
     *)
