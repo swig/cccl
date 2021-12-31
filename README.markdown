@@ -116,14 +116,17 @@ work together, but with cccl you can make them become reluctant friends.
 Autoconf requires a file called *configure.ac*, which on legacy projects may
 still be called *configure.in*.  In order to use autoconf and MSVC, make sure 
 the following line is in your *configure.ac* file:
-
 ```
 AC_CANONICAL_HOST
 ```
 
-If your *configure.ac* file contains a reference to `AM_PROG_LIBTOOL`, add the
-following line *before* `AM_PROG_LIBTOOL`:
+If your *configure.ac* file contains a reference to `LT_INIT`, add the `[win32-dll]` option:
+```
+LT_INIT [win32-dll]
+```
 
+Or if your *configure.ac* file is using the legacy, deprecated equivalent syntax and contains a reference to `AM_PROG_LIBTOOL`, add the
+following line *before* `AM_PROG_LIBTOOL`:
 ```
 AC_LIBTOOL_WIN32_DLL
 ```
