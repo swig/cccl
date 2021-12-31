@@ -4,7 +4,7 @@ Unix cc compiler to Microsoft's cl compiler wrapper at https://github.com/swig/c
 ## Introduction
 
 cccl is a wrapper around Microsoft's cl.exe Visual C++ compiler.  It converts
-tradional Unix cc command line parameters to their cl.exe equivalents.
+traditional Unix cc command line parameters to their cl.exe equivalents.
 
 The main use for cccl is for using Unix build processes with the Microsoft
 C/C++ compiler.  Using cccl in conjunction with ports of Unix utilities, it is
@@ -58,7 +58,7 @@ want to learn using [autotools and MSVC](#autotools-and-msvc) together.
 
 ### Quick Overview
 
-cccl is known to work on Cygwin and MinGW.
+cccl is known to work on Cygwin, MinGW, MinGW-w64 and MSYS2.
 
 You can either copy the cccl script to somewhere on your system, or you can do
 a `./bootstrap && ./configure && make install` from the source if you have a 
@@ -74,15 +74,18 @@ cccl uses and hence requires ports of the following Unix utilities:
 
 cccl is a bash shell script which makes use of these utilities.  Therefore, you
 will need at the very least a Windows versions of these utilities.  The easiest
-and best source of these (as well as many other Unix tools) is RedHat's Cygwin.
-Go to the [Cygwin website](https://cygwin.com/) to download and install Cygwin.
-If you are planning on using cccl to build autotools projects, make sure that
-you install autoconf, automake and libtool as well. Alternatively install
-[MinGW](http://mingw.org/) instead of Cygwin.
+and best source of these (as well as many other Unix tools) has traditionally
+been RedHat's [Cygwin](https://cygwin.com/). Other well known Unix-like systems
+can also be used - 
+[MinGW](http://mingw.org/), [MinGW-w64](https://www.mingw-w64.org/),
+[MSYS2](https://www.msys2.org/).
+
+Install one of these and if you are planning on using cccl to build autotools projects, make sure that
+you install autoconf, automake and libtool as well.
 
 ### Installing cccl
 
-Once you have a working Cygwin or MinGW environment, you have two options.  You
+Once you have a working Unix-like environment, you have two options.  You
 may manually copy the *cccl* file to somewhere in your path, since it's just a 
 script. Alternatively, you may do the normal Unix 
 `./bootstrap && ./configure && make && make install` routine.
@@ -98,7 +101,8 @@ run a *Visual Studio Command Prompt* and is commonly under the *Visual Studio
 Tools* menu. This invokes one of the aforementioned batch files.  Refer to the 
 documentation included with Visual Studio for more details about running the 
 Visual Studio command line tools.  Note that the GNU linker is also called 
-*link.exe* and is usually present in Cygwin and MinGW, but this shouldn't be a 
+*link.exe* and is usually present in the Unix-like systems running on Windows,
+but this shouldn't be a 
 problem as cccl does not invoke the linker directly, it relies on *cl.exe* to 
 invoke the appropriate Microsoft linker.
 
@@ -155,7 +159,7 @@ much improved Windows support for supporting dynamic link libraries.
 Once you've generated your configure script and Makefiles by running aclocal,
 autoheader, autoconf and automake, you're ready to compile.
 
-Before you run the configure script (from within Cygwin or MinGW, of course),
+Before you run the configure script (from within your Unix-like system, of course),
 you'll need to set the compiler and linker environment variables to use cccl.
 
 ```sh
@@ -254,7 +258,7 @@ Both of the above examples will thus invoke cl.exe as follows:
 cl main.c /W3 /link /LTCG /INCREMENTAL:NO
 ```
 
-In the MinGW/MSYS environment, `/` options are not supported very well and so are
+In the MinGW/MSYS based systems, `/` options are not supported very well and so are
 instead converted to `-` options and hence cccl will invoke cl.exe as
 follows:
 
