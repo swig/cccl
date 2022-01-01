@@ -3,7 +3,7 @@
 # cccl
 # Wrapper around MS's cl.exe to make it act more like Unix cc
 #
-# Copyright (C) 2000-2015 by contributors listed in the AUTHORS file.
+# Copyright (C) 2000-2022 by contributors listed in the AUTHORS file.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ while test $# -gt 0; do
 
     --version)
         cat <<EOF
-cccl 1.2
+cccl 1.3
 EOF
         exit 0;
         ;;
