@@ -3,7 +3,7 @@
 # cccl
 # Wrapper around MS's cl.exe to make it act more like Unix cc
 #
-# Copyright (C) 2000-2015,2019,2021 by contributors listed in the AUTHORS file.
+# Copyright (C) 2000-2022 by contributors listed in the AUTHORS file.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -123,12 +123,12 @@ EOF
 
     -L)
         shift
-        path=`echo "$1" | sed 's#/\([a-zA-Z]\)/#\1:/#'`
+        path=`echo "$1"`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
     -L*)
-        path=`echo "$1" | sed 's/-L//' | sed 's#/\([a-zA-Z]\)/#\1:/#'`
+        path=`echo "$1" | sed 's/-L//'`
         linkopt+=("${slash}LIBPATH:$path")
         ;;
 
@@ -285,7 +285,7 @@ EOF
         # All '/' options are assumed to be for cl and are passed through,
         # ... if it isn't a file/folder
         if test -e "$1"; then
-           path=`echo "$1" | sed 's#/\([a-zA-Z]\)/#\1:/#'`
+           path=`echo "$1"`
            clopt+=("$path")
         else
            clopt+=("${slash}${1:1}")
