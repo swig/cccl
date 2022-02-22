@@ -39,6 +39,30 @@ case $MACHTYPE in
         ;;
 esac
 
+for arg in $@; do
+    if [ "$arg" == "-dumpmachine" ] || [ "$arg" == "-dumpmachinefull" ]; then
+        cmd_out="$(cl 2>&1)"
+        cmd_out_parts=($cmd_out)
+        msvc="msvc"
+        if [ "$arg" == "-dumpmachinefull" ]; then
+            msvc="$msvc${cmd_out_parts[6]}"
+        fi
+        arch="$(echo ${cmd_out_parts[8]} | awk '{print tolower($0)}')"
+        output="pc-windows-$msvc"
+        if [ "$arch" = "x64" ]; then
+            output="x86_64-$output"
+        elif [ "$arch" = "x86" ]; then
+            output="i386-$output"
+        elif [ "$arch" = "arm64" ]; then
+            output="aarch64-$output"
+        else
+            output="armv7-$output"
+        fi
+        echo $output
+        exit 0
+    fi
+done
+
 # prog specifies the program that should be run cl.exe
 prog=cl
 # opts specifies the command line to pass to the MSVC program
