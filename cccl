@@ -39,25 +39,40 @@ case $MACHTYPE in
         ;;
 esac
 
+# Process the "dumpmachine"/"dumpmachinefull" arguments first, if they exist, and exit gracefully
 for arg in $@; do
-    if [ "$arg" == "-dumpmachine" ] || [ "$arg" == "-dumpmachinefull" ]; then
-        cmd_out="$(cl 2>&1)"
-        cmd_out_parts=($cmd_out)
+    if [[ $arg =~ ^-dumpmachine(full)?$ ]]; then
+        cl_output_parts=($(cl 2>&1))
+
         msvc="msvc"
         if [ "$arg" == "-dumpmachinefull" ]; then
-            msvc="$msvc${cmd_out_parts[6]}"
+            msvc="$msvc${cl_output_parts[6]}"
         fi
-        arch="$(echo ${cmd_out_parts[8]} | awk '{print tolower($0)}')"
+
+        arch="$(echo ${cl_output_parts[8]} | awk '{print tolower($0)}')"
         output="pc-windows-$msvc"
-        if [ "$arch" = "x64" ]; then
+        case $arch in
+
+        x64)
             output="x86_64-$output"
-        elif [ "$arch" = "x86" ]; then
+            ;;
+
+        # "file" command, with "libmagic", shows "Intel 80386" for "X86" architecture
+        x86)
             output="i386-$output"
-        elif [ "$arch" = "arm64" ]; then
+            ;;
+
+        arm64)
             output="aarch64-$output"
-        else
+            ;;
+
+        # "file" command, with "libmagic", shows "ARMv7" for "ARM" architecture
+        arm)
             output="armv7-$output"
-        fi
+            ;;
+
+        esac
+
         echo $output
         exit 0
     fi
