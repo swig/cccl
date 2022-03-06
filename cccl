@@ -39,10 +39,25 @@ case $MACHTYPE in
         ;;
 esac
 
+# prog specifies the program that should be run cl.exe
+prog=cl
+# opts specifies the command line to pass to the MSVC program
+clopt=("${slash}nologo")
+linkopt=("${slash}link")
+debug=
+# gotparam is 0 if we didn't ever see a param, in which case we show usage()
+gotparam=
+muffle=
+verbose=
+shared_index=-1
+
+# "dumpmachine" is a CC command-line argument to show the compiler's host triplet
+# "cccl" will follow "clang"'s MSVC "dumpmachine" output
+# "dumpmachinefull" is added as well to show the full MSVC version
 # Process the "dumpmachine"/"dumpmachinefull" arguments first, if they exist, and exit gracefully
 for arg in $@; do
     if [[ $arg =~ ^-dumpmachine(full)?$ ]]; then
-        cl_output_parts=($(cl 2>&1))
+        cl_output_parts=($($prog 2>&1))
 
         msvc="msvc"
         if [ "$arg" == "-dumpmachinefull" ]; then
@@ -77,18 +92,6 @@ for arg in $@; do
         exit 0
     fi
 done
-
-# prog specifies the program that should be run cl.exe
-prog=cl
-# opts specifies the command line to pass to the MSVC program
-clopt=("${slash}nologo")
-linkopt=("${slash}link")
-debug=
-# gotparam is 0 if we didn't ever see a param, in which case we show usage()
-gotparam=
-muffle=
-verbose=
-shared_index=-1
 
 processargs()
 {
