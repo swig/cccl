@@ -50,6 +50,9 @@ gotparam=
 muffle=
 verbose=
 shared_index=-1
+script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+libraries=""
+print_search_dirs=false
 
 processargs()
 {
@@ -121,15 +124,30 @@ EOF
         clopt+=("${slash}O2")
         ;;
 
+    -print-search-dirs | /print-search-dirs)
+        # Set "print_search_dirs" to print later
+        print_search_dirs=true
+        ;;
+
     -L)
         shift
         path=`echo "$1"`
         linkopt+=("${slash}LIBPATH:$path")
+        if [ -z "$libraries" ]; then
+            libraries="$path"
+        else
+            libraries="$path:$libraries"
+        fi
         ;;
 
     -L*)
         path=`echo "$1" | sed 's/-L//'`
         linkopt+=("${slash}LIBPATH:$path")
+        if [ -z "$libraries" ]; then
+            libraries="$path"
+        else
+            libraries="$path:$libraries"
+        fi
         ;;
 
     -link)
@@ -300,6 +318,77 @@ done
 processargs $CCCL_OPTIONS
 IFS=""
 processargs $@
+
+# Process "print-search-dirs" and exit gracefully
+if $print_search_dirs; then
+    # Record the original "IFS"
+    if ! [ -z "$IFS" ]; then
+        originalIFS="$IFS"
+    fi
+
+    # Set the "winpath" binary to convert Windows paths to Unix paths.
+    winpath_bin="$CCCL_WINPATH_BIN" # "CCCL_WINPATH_BIN" must have the same format, e.g., as "cygpath"
+    if [ -z "$winpath_bin" ]; then
+        # Guess the "winpath" binary
+        IFS=" "
+        guess_winpath_bins_str="cygpath wslpath winepath" # For Cygwin/MSYS2 and native Windows, WSL and native Windows, and Linux and Wine, respectfully
+        read -ra guess_winpath_bins <<< "$guess_winpath_bins_str"
+        for guess_winpath_bin in ${guess_winpath_bins[@]}; do
+            winpath_bin="$(which $guess_winpath_bin)"
+            if ! [ -z "$winpath_bin" ]; then
+                break
+            fi
+        done
+        if [ -z "$winpath_bin" ]; then
+            echo "Cannot guess \"winpath\" binary to convert Windows paths to Unix paths. You must set \"CCCL_WINPATH_BIN\" with a format similar to \"cygpath\", \"wslpath\", or \"winepath\"."
+            exit 1
+        fi
+    fi
+
+    # Print "install"
+    echo "install: $script_dir"
+
+    # TODO: Implement printing "programs" for the MSVC toolchain. Not sure which bin dirs to print, nor if it is ever needed for
+    # the MSVC toolchain
+
+    # Set the global libraries
+    global_libraries=""
+    IFS=";"
+    read -ra global_libraries_windows <<< "$LIB"
+    for libpath in ${global_libraries_windows[@]}; do
+        # Using "realpath" is undesirable, but it might be the only solution to have a path without ":" when the
+        # the Windows drive letter is present in the path. For instance, a path with "c:" in Wine will be converted
+        # to a path with "drive_c". The reason for avoiding paths with ":" is that ":" is generally unescapable in Unix
+        # (e.g. in "PATH" environment variable).
+        unix_global_library_path="$(realpath $($winpath_bin -u $libpath))"
+        if [ -z "$global_libraries" ]; then
+            global_libraries="$unix_global_library_path"
+        else
+            global_libraries="$unix_global_library_path:$global_libraries"
+        fi
+    done
+
+    # Update "libraries" with the global libraries
+    if [ -z "$libraries" ]; then
+        libraries="$global_libraries"
+    else
+        # Global libraries are set after the ones defined by the command line argument "-L", as the latter takes
+        # precedence
+        libraries="$libraries:$global_libraries"
+    fi
+
+    # Print "libraries"
+    echo "libraries: =$libraries"
+
+    # Reset the "IFS"
+    if ! [ -z "$originalIFS" ]; then
+        IFS="$originalIFS"
+    else
+        unset IFS
+    fi
+
+    exit 0
+fi
 
 if test $shared_index -ge 0 -a -n "$debug"; then
     clopt[$shared_index]="${slash}LDd"
