@@ -54,6 +54,69 @@ script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 libraries=""
 print_search_dirs=false
 
+# Set the "winpath" binary to convert Windows paths to Unix paths
+winpath_bin="$CCCL_WINPATH_BIN" # "CCCL_WINPATH_BIN" must have the same format, e.g., as "cygpath"
+if [ -z "$winpath_bin" ]; then
+    # Guess the "winpath" binary
+    # Record the original "IFS"
+    if ! [ -z "$IFS" ]; then
+        originalIFS="$IFS"
+    fi
+    IFS=" "
+    guess_winpath_bins_str="cygpath wslpath winepath" # For Cygwin/MSYS2 and native Windows, WSL and native Windows,
+                                                      # and Linux and Wine, respectfully
+    read -ra guess_winpath_bins <<< "$guess_winpath_bins_str"
+    for guess_winpath_bin in ${guess_winpath_bins[@]}; do
+        winpath_bin="$(which $guess_winpath_bin)"
+        if ! [ -z "$winpath_bin" ]; then
+            break
+        fi
+    done
+    # Reset the "IFS"
+    if ! [ -z "$originalIFS" ]; then
+        IFS="$originalIFS"
+    else
+        unset IFS
+    fi
+    if [ -z "$winpath_bin" ]; then
+        echo "Cannot guess \"winpath\" binary to convert Windows paths to Unix paths and back \
+to Windows paths. You must set \"CCCL_WINPATH_BIN\" environment variable with a format similar \
+to \"cygpath\", \"wslpath\", or \"winepath\"."
+        exit 1
+    fi
+fi
+
+# Set the "python_bin" binary to help get Windows paths' prefixes
+python_bin="$CCCL_PYTHON_BIN" # "CCCL_PYTHON_BIN" must have "pathlib" installed (installed by default in Python 3)
+if [ -z "$python_bin" ]; then
+    # Guess the "python" binary
+    # Record the original "IFS"
+    if ! [ -z "$IFS" ]; then
+        originalIFS="$IFS"
+    fi
+    IFS=" "
+    guess_python_bins_str="python3 python2 python"
+    read -ra guess_python_bins <<< "$guess_python_bins_str"
+    for guess_python_bin in ${guess_python_bins[@]}; do
+        python_bin="$(which $guess_python_bin)"
+        if ! [ -z "$python_bin" ]; then
+            break
+        fi
+    done
+    # Reset the "IFS"
+    if ! [ -z "$originalIFS" ]; then
+        IFS="$originalIFS"
+    else
+        unset IFS
+    fi
+    if [ -z "$python_bin" ]; then
+        echo "Cannot guess \"python\" binary. You must set \"CCCL_PYTHON_BIN\" environment \
+variable with a python binary path (or retrieved from \"PATH\" environment variable) to \
+a Python installation with \"pathlib\" module installed."
+        exit 1
+    fi
+fi
+
 processargs()
 {
 ### Run through every option and convert it to the proper MS one
@@ -129,28 +192,28 @@ EOF
         print_search_dirs=true
         ;;
 
-    -L)
-        shift
-        path=`echo "$1"`
-        linkopt+=("${slash}LIBPATH:$path")
-        if [ -z "$libraries" ]; then
-            libraries="$path"
+    -L | -L*)
+        if [ "$1" = "-L" ]; then
+            shift
+            libpath="$(echo "$1")"
         else
-            libraries="$path:$libraries"
+            libpath="$(echo "$1" | sed 's/-L//')"
+        fi
+
+        # Convert the path to absolute path in Unix
+        libpath="$(readlink -m $libpath)"
+
+        # Convert the Unix path to Windows path and send it to the compiler arguments
+        linkopt+=("${slash}LIBPATH:$($winpath_bin -w $libpath)")
+
+        if [ -z "$libraries" ]; then
+            libraries="$libpath"
+        else
+            libraries="$libpath:$libraries"
         fi
         ;;
 
-    -L*)
-        path=`echo "$1" | sed 's/-L//'`
-        linkopt+=("${slash}LIBPATH:$path")
-        if [ -z "$libraries" ]; then
-            libraries="$path"
-        else
-            libraries="$path:$libraries"
-        fi
-        ;;
-
-    -link)
+    -link | /link)
         # Libtool compatibility which is trying to pass linker options to cl
         # Same behaviour as cl - all options after -link are linker options
         shift
@@ -172,6 +235,9 @@ EOF
         done
         ;;
 
+
+    # TODO: Add support for "-l:<full_lib_name>" pattern, where "full_lib_name" is the
+    #       full library name (e.g. instead of "-lLLVM" there should be a pattern for "-l:LLVM.lib" as well).
     -l*)
         lib=`echo "$1" | sed 's/-l//'`
         lib="$lib.lib"
@@ -236,14 +302,14 @@ EOF
         #ignore aliasing
         ;;
 
-    -isystem)
+    -isystem | -I)
         shift
-        clopt+=("${slash}I$1")
-        ;;
 
-    -I)
-        shift
-        clopt+=("${slash}I$1")
+        # Convert the path to absolute path in Unix
+        path="$(readlink -m $1)"
+
+        # Convert the Unix path to Windows path and send it to the compiler arguments
+        clopt+=("${slash}I$($winpath_bin -w $path)")
         ;;
 
     -rpath)
@@ -278,27 +344,6 @@ EOF
         clopt+=("${slash}Tp$1")
         ;;
 
-    /link)
-        # Same behaviour as cl - all options after /link are linker options
-        shift
-        while test $# -gt 0; do
-            case "$1" in
-            -*)
-                linkopt+=("${slash}${1:1}")
-                ;;
-
-            /*)
-                linkopt+=("${slash}${1:1}")
-                ;;
-
-            *)
-                linkopt+=("$1")
-                ;;
-            esac
-            shift
-        done
-        ;;
-
     /*)
         # All '/' options are assumed to be for cl and are passed through
         clopt+=("${slash}${1:1}")
@@ -318,77 +363,6 @@ done
 processargs $CCCL_OPTIONS
 IFS=""
 processargs $@
-
-# Process "print-search-dirs" and exit gracefully
-if $print_search_dirs; then
-    # Record the original "IFS"
-    if ! [ -z "$IFS" ]; then
-        originalIFS="$IFS"
-    fi
-
-    # Set the "winpath" binary to convert Windows paths to Unix paths.
-    winpath_bin="$CCCL_WINPATH_BIN" # "CCCL_WINPATH_BIN" must have the same format, e.g., as "cygpath"
-    if [ -z "$winpath_bin" ]; then
-        # Guess the "winpath" binary
-        IFS=" "
-        guess_winpath_bins_str="cygpath wslpath winepath" # For Cygwin/MSYS2 and native Windows, WSL and native Windows, and Linux and Wine, respectfully
-        read -ra guess_winpath_bins <<< "$guess_winpath_bins_str"
-        for guess_winpath_bin in ${guess_winpath_bins[@]}; do
-            winpath_bin="$(which $guess_winpath_bin)"
-            if ! [ -z "$winpath_bin" ]; then
-                break
-            fi
-        done
-        if [ -z "$winpath_bin" ]; then
-            echo "Cannot guess \"winpath\" binary to convert Windows paths to Unix paths. You must set \"CCCL_WINPATH_BIN\" with a format similar to \"cygpath\", \"wslpath\", or \"winepath\"."
-            exit 1
-        fi
-    fi
-
-    # Print "install"
-    echo "install: $script_dir"
-
-    # TODO: Implement printing "programs" for the MSVC toolchain. Not sure which bin dirs to print, nor if it is ever needed for
-    # the MSVC toolchain
-
-    # Set the global libraries
-    global_libraries=""
-    IFS=";"
-    read -ra global_libraries_windows <<< "$LIB"
-    for libpath in ${global_libraries_windows[@]}; do
-        # Using "realpath" is undesirable, but it might be the only solution to have a path without ":" when the
-        # the Windows drive letter is present in the path. For instance, a path with "c:" in Wine will be converted
-        # to a path with "drive_c". The reason for avoiding paths with ":" is that ":" is generally unescapable in Unix
-        # (e.g. in "PATH" environment variable).
-        unix_global_library_path="$(realpath $($winpath_bin -u $libpath))"
-        if [ -z "$global_libraries" ]; then
-            global_libraries="$unix_global_library_path"
-        else
-            global_libraries="$unix_global_library_path:$global_libraries"
-        fi
-    done
-
-    # Update "libraries" with the global libraries
-    if [ -z "$libraries" ]; then
-        libraries="$global_libraries"
-    else
-        # Global libraries are set after the ones defined by the command line argument "-L", as the latter takes
-        # precedence
-        libraries="$libraries:$global_libraries"
-    fi
-
-    # Print "libraries"
-    echo "libraries: =$libraries"
-
-    # Reset the "IFS"
-    if ! [ -z "$originalIFS" ]; then
-        IFS="$originalIFS"
-    else
-        unset IFS
-    fi
-
-    exit 0
-fi
 
 if test $shared_index -ge 0 -a -n "$debug"; then
     clopt[$shared_index]="${slash}LDd"
@@ -418,6 +392,86 @@ if test -n "$verbose" ; then
   echo ""
 fi
 
+# Process "print-search-dirs" and exit gracefully
+if $print_search_dirs; then
+    # Print "install"
+    echo "install: $script_dir"
+
+    # TODO: Implement printing "programs" for the MSVC toolchain. Not sure which bin dirs to print, nor if it is ever needed for
+    # the MSVC toolchain
+
+    # To get the Windows path prefix from the Windows path, using Python's "pathlib" module
+    get_windows_prefix_source="$(printf "%s\n" \
+                                "import sys" \
+                                "import pathlib" \
+                                "windows_pure_path = pathlib.PureWindowsPath(sys.argv[1])" \
+                                "drive = windows_pure_path.drive + \"\\\\\" if windows_pure_path.drive else \".\\\\\"" \
+                                "print(drive)")"
+
+    # To replace the long version of the Windows prefix in Unix form with the short version, in the long Unix path.
+    # In other words, generate a short version of the full Unix path.
+    replace_source="$(printf "%s\n" \
+                      "import sys" \
+                      "import pathlib" \
+                      "libpath_unix_long_parts = list(pathlib.PurePosixPath(sys.argv[1]).parts)" \
+                      "libpath_unix_long_prefix_parts = list(pathlib.PurePosixPath(sys.argv[2]).parts)" \
+                      "libpath_unix_short_prefix_parts = list(pathlib.PurePosixPath(sys.argv[3]).parts)" \
+                      "new_path = pathlib.PurePosixPath(\"\")" \
+                      "new_path_parts = libpath_unix_short_prefix_parts + libpath_unix_long_parts[len(libpath_unix_long_prefix_parts):]" \
+                      "for part in new_path_parts:" \
+                      "    new_path = new_path.joinpath(part)" \
+                      "print(new_path)")"
+
+    # Set the global libraries
+    global_libraries=""
+
+    # Record the original "IFS"
+    if ! [ -z "$IFS" ]; then
+        originalIFS="$IFS"
+    fi
+    IFS=";"
+    read -ra global_libraries_windows <<< "$LIB"
+    for libpath in ${global_libraries_windows[@]}; do
+        libpath="$($winpath_bin -w $($winpath_bin -u $libpath))" # Get the full path of the Windows path, by converting it to Unix and back to Windows.
+        libpath_windows_prefix="$($python_bin -c $get_windows_prefix_source $libpath)"
+        libpath_unix_long_prefix="$($winpath_bin -u $libpath_windows_prefix)"
+        libpath_unix_short_prefix="$(readlink -m $libpath_unix_long_prefix)"
+        libpath_unix_long="$($winpath_bin -u $libpath)"
+
+        # Replace Unix version of the long Windows path prefix with the Unix version of the short Windows path prefix of the long Unix version of the Windows library path.
+        # The reason for replacing is that Unix usually do not escape ":" in paths strings (e.g. in "PATH" environment variable or in "libtool" when reading "print-search-dirs"'s "libraries" output),
+        # which is, for example, what Windows drives have (e.g. "c:\" that gets converted to "$WINEPREFIX/dosdevices/c:/" in "winepath" command). Instead of replacing the whole Unix path
+        # with a shorter version, using "realpath" for example, and losing the original path (possibly a symlink directory), only follow the real path of the Windows prefix and keep the rest of the path intact.
+        unix_global_library_path="$($python_bin -c "$replace_source" $libpath_unix_long $libpath_unix_long_prefix $libpath_unix_short_prefix)"
+
+        if [ -z "$global_libraries" ]; then
+            global_libraries="$unix_global_library_path"
+        else
+            global_libraries="$global_libraries:$unix_global_library_path"
+        fi
+    done
+    # Reset the "IFS"
+    if ! [ -z "$originalIFS" ]; then
+        IFS="$originalIFS"
+    else
+        unset IFS
+    fi
+
+    # Update "libraries" with the global libraries
+    if [ -z "$libraries" ]; then
+        libraries="$global_libraries"
+    else
+        # Global libraries are set after the ones defined by the command line argument "-L", as the latter takes
+        # precedence
+        libraries="$libraries:$global_libraries"
+    fi
+
+    # Print "libraries"
+    echo "libraries: =$libraries"
+
+    exit 0
+fi
+
 if test -z "$muffle" ; then
     exec $prog ${clopt[@]} ${linkopt[@]}
 else
@@ -425,4 +479,3 @@ else
     exec $prog ${clopt[@]} ${linkopt[@]} | tr -d '\r' | grep -v -e "\.cpp$" -e "\.cxx$" -e "\.cc$" -e "\.C$" -e "\.c$" -e "^   Creating library" -e "^Generating Code"
     exit ${PIPESTATUS[0]}
 fi
-
