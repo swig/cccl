@@ -433,6 +433,11 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 * Support -link option the same as /link
 * Add conversion for -std option
 
+### Version 1.3 (18 Nov 2022)
+
+* Add support for space after -I and -L options
+* Documentation updates
+
 ### Future
 
 The move to Github at https://github.com/swig/cccl is hoped to inject some life 
