@@ -282,8 +282,14 @@ EOF
         ;;
 
     /*)
-        # All '/' options are assumed to be for cl and are passed through
-        clopt+=("${slash}${1:1}")
+        # All '/' options are assumed to be for cl and are passed through,
+        # ... if it isn't a file/folder
+        if test -e "$1"; then
+           path=`echo "$1"`
+           clopt+=("$path")
+        else
+           clopt+=("${slash}${1:1}")
+        fi
         ;;
 
     *)
