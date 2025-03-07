@@ -320,14 +320,14 @@ if test x$V = x1 ; then
 fi
 
 if test -n "$verbose" ; then
-  echo -n "$prog"
-  for opt in "${clopt[@]}" ; do
-    echo -n " \"$opt\""
-  done
-  for opt in "${linkopt[@]}" ; do
-    echo -n " \"$opt\""
-  done
-  echo ""
+    echo -n "$prog"
+    for opt in "${clopt[@]}" ; do
+        echo -n " \"$opt\""
+    done
+    for opt in "${linkopt[@]}" ; do
+        echo -n " \"$opt\""
+    done
+    echo ""
 fi
 
 if test -z "$muffle" ; then
