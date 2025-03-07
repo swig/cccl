@@ -334,7 +334,7 @@ if test -z "$muffle" ; then
     exec $prog ${clopt[@]} ${linkopt[@]}
 else
   # tr needed below for $ in regex to work (simple alternative to dos2unix)
-    exec $prog ${clopt[@]} ${linkopt[@]} | tr -d '\r' | grep -v -e "\.cpp$" -e "\.cxx$" -e "\.cc$" -e "\.C$" -e "\.c$" -e "^   Creating library" -e "^Generating Code"
+    exec $prog ${clopt[@]} ${linkopt[@]} | tr -d '\r' | grep -a -v -e "\.cpp$" -e "\.cxx$" -e "\.cc$" -e "\.C$" -e "\.c$" -e "^   Creating library" -e "^Generating Code"
     exit ${PIPESTATUS[0]}
 fi
 
