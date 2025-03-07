@@ -69,8 +69,10 @@ do anything but copy the cccl script, though.
 
 cccl uses and hence requires ports of the following Unix utilities:
   - bash
+  - grep
   - sed
   - tr
+  - uname
 
 cccl is a bash shell script which makes use of these utilities.  Therefore, you
 will need at the very least a Windows versions of these utilities.  The easiest

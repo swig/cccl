@@ -30,8 +30,9 @@ given by [OPTIONS] that Unix cc understands into parameters that cl understands.
 EOF
 }
 
-case $MACHTYPE in
-    *-msys)
+operating_system=$(uname -o)
+case $operating_system in
+    Msys)
         slash="-"
         ;;
     *)
