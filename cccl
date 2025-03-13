@@ -22,7 +22,7 @@
 usage()
 {
     cat <<EOF
-Usage: cccl [--cccl-link] [--cccl-muffle] [--cccl-verbose] [--help] [--version]
+Usage: cccl [--cccl-link OPTION] [--cccl-muffle] [--cccl-slash] [--cccl-verbose] [--help] [--version]
        [OPTIONS]
 
 cccl is a wrapper around Microsoft's cl.exe compiler.  It translates parameters
@@ -49,6 +49,7 @@ debug=
 # gotparam is 0 if we didn't ever see a param, in which case we show usage()
 gotparam=
 muffle=
+slash_slash="${slash}"
 verbose=
 shared_index=-1
 
@@ -74,7 +75,7 @@ while test $# -gt 0; do
         shift
         case "$1" in
         /*)
-            linkopt+=("${slash}${1:1}")
+            linkopt+=("${slash_slash}${1:1}")
             ;;
 
         *)
@@ -86,6 +87,10 @@ while test $# -gt 0; do
     --cccl-muffle)
         # Remove the unnecessary junk that the compiler outputs to stdout
         muffle=1
+        ;;
+
+    --cccl-slash)
+        slash_slash="/"
         ;;
 
     --cccl-verbose)
@@ -144,7 +149,7 @@ EOF
                 ;;
 
             /*)
-                linkopt+=("${slash}${1:1}")
+                linkopt+=("${slash_slash}${1:1}")
                 ;;
 
             *)
@@ -271,7 +276,7 @@ EOF
                 ;;
 
             /*)
-                linkopt+=("${slash}${1:1}")
+                linkopt+=("${slash_slash}${1:1}")
                 ;;
 
             *)
@@ -284,7 +289,7 @@ EOF
 
     /*)
         # All '/' options are assumed to be for cl and are passed through
-        clopt+=("${slash}${1:1}")
+        clopt+=("${slash_slash}${1:1}")
         ;;
 
     *)

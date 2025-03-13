@@ -20,7 +20,7 @@ available for Windows?
 There are a few reasons but the primary reason is usually to support 
 cross-platform projects that need to use autoconf/automake/libtool for the 
 build process.  The obvious thing might be to use gcc on all platforms.  But on 
-Windows, not all third-party libraries work with gcc, some only work with MSVC.  
+Windows, not all third-party libraries work with gcc, some only work with MSVC.
 cccl allows one to use the same build process with the MSVC compiler, but with 
 only minimal changes to the build process.
 
@@ -95,7 +95,7 @@ script. Alternatively, you may do the normal Unix
 ### Setting Up Your Path
 
 Obviously you'll want *cccl* to be in your path.  Since cccl directly invokes 
-*cl.exe*, you'll need to make sure it is in your path as well.  This may have 
+*cl.exe*, you'll need to make sure *cl.exe* is in your path as well.  This may have 
 been done for you during your Visual Studio install.  If not, there should be a 
 file called *vcvars32.bat* or *vcvarsall.bat* which can be run from an MS-DOS 
 command prompt to set your path.  Visual Studio usually installs a menu item to 
@@ -167,7 +167,7 @@ autoheader, autoconf and automake, you're ready to compile.
 Before you run the configure script (from within your Unix-like system, of course),
 you'll need to set the compiler and linker environment variables to use cccl.
 
-```sh
+```bash
 export CC=cccl
 export CXX=cccl
 export LD=cccl
@@ -193,13 +193,13 @@ Modern versions require `/EHsc`, but older versions require `/GX`.  Depending
 on the version of cl.exe, you may need to add `/GR` to enable run-time type 
 information (RTTI). Use:
 
-```sh
+```bash
 export CXXFLAGS="/EHsc"
 ```
 
 for new versions or for older versions:
 
-```sh
+```bash
 export CXXFLAGS="/GX /GR"
 ```
 
@@ -240,7 +240,7 @@ them after `/link`.  There are a few approaches to passing additional options
 to the linker directly. The first is to specify them as you would with cl.exe 
 where everything after `/link` or `-link` is a linker option:
 
-```
+```bash
 cccl main.c /W3 /link /LTCG /INCREMENTAL:NO
 ```
 
@@ -248,7 +248,7 @@ The second approach is to use the cccl option `--cccl-link` which passes just
 the single next option to the linker. If using this approach, the above example
 can be rewritten as follows:
 
-```
+```bash
 cccl main.c --cccl-link /LTCG /W3 --cccl-link /INCREMENTAL:NO
 ```
 
@@ -263,21 +263,13 @@ Both of the above examples will thus invoke cl.exe as follows:
 cl main.c /W3 /link /LTCG /INCREMENTAL:NO
 ```
 
-In the MinGW/MSYS based systems, `/` options are not supported very well and so are
-instead converted to `-` options and hence cccl will invoke cl.exe as
-follows:
-
-```
-cl main.c -W3 -link -LTCG -INCREMENTAL:NO
-```
-
 ### Verbosity
 
 Visual C++ is unusually verbose for a compiler and displays the names of the
 files it is compiling and sometimes "Creating library" and similiar messages.
 For example, default output for compiling two or more files is shown below:
 
-```
+```bash
 $ cccl main.c stuff.c -o runme.exe
 main.c
 stuff.c
@@ -288,19 +280,113 @@ cccl supports the `--cccl-muffle` option which parses the output from cl.exe
 and suppresses this extra verbiage. Adding this option to the example results
 in silent output like traditional Unix compilers:
 
-```
+```bash
 $ cccl main.c stuff.c -o runme.exe --cccl-muffle
 ```
 
 The `--cccl-verbose` option will display exactly how cl.exe is invoked:
 
-```
+```bash
 $ cccl main.c stuff.c -o runme.exe --cccl-verbose
 cl "/nologo" "main.c" "stuff.c" "/Ferunme.exe"
 main.c
 stuff.c
 Generating Code...
 ```
+
+### Slashes and Dashes
+
+All options provided to cccl beginning `/` or `-` will be converted to an appropriate
+option beginning with `/` and then passed on to cl.exe.
+However in the MinGW/MSYS and MSYS2 based operating systems, `/` options are handled differently
+and so cccl will instead convert them to an option beginning with `-`.
+
+For example, using `--cccl-verbose` to show how cccl converts on most operating systems:
+
+```bash
+$ cccl --cccl-verbose /EHsc -g runme.cpp -o runme.exe
+cl "/nologo" "/EHsc" "/Zi" "runme.cpp" "/Ferunme.exe"
+```
+
+But on MSYS or MSYS2 based operating systems:
+
+```bash
+$ cccl --cccl-verbose /EHsc -g runme.cpp -o runme.exe
+cl "-nologo" "-EHsc" "-Zi" "runme.cpp" "-Ferunme.exe"
+```
+
+These systems try to convert anything that looks like a path to a Windows equivalent
+but only when passing options to a native Windows executable, such as cl.exe.
+Absolute paths are problematic as they begin with a leading `/`.
+Consider the input file specified with an absolute path in the next example:
+
+```bash
+$ cccl --cccl-verbose /EHsc -g /tmp/runme.cpp -o runme.exe
+cl "-nologo" "-EHsc" "-Zi" "-tmp/runme.cpp" "-Ferunme.exe"
+```
+Note how `/tmp/runme.cpp` is modified to `-tmp/runme.cpp`, which is default handling
+for cccl for unknown 'options' beginning with `/`, even though a path was intended in
+this instance.
+
+One solution is to use `--cccl-slash` which turns off the conversion
+of `/` to `-` for unknown 'options':
+
+```bash
+$ cccl --cccl-verbose --cccl-slash /EHsc -g /tmp/runme.cpp -o runme.exe
+cl "-nologo" "/EHsc" "-Zi" "/tmp/runme.cpp" "-Ferunme.exe"
+# What the OS passes to cl.exe is
+cl "-nologo" "C:/msys64/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Ferunme.exe"
+```
+
+The operating system will then expand `/tmp/runme.cpp` into a Windows path, such as 
+`C:/msys64/tmp/runme.cpp`. However, the operating system also thinks `/EHsc`
+is a path and mistakenly converts it into something like `C:/msys64/EHsc`.
+See https://www.msys2.org/docs/filesystem-paths/#automatic-unix-windows-path-conversion
+for more details on this system's automatic path conversions.
+The recommendation when using `--cccl-slash` is firstly to use `//` where a `/` option was
+intended as these are converted back to `/` by the operating system and secondly
+use a single leading `/` only for values that really are absolute paths.
+So correct usage would then be:
+
+```bash
+$ cccl --cccl-verbose --cccl-slash //EHsc -g /tmp/runme.cpp -o runme.exe
+cl "-nologo" "//EHsc" "-Zi" "/tmp/runme.cpp" "-Ferunme.exe"
+# What the OS passes to cl.exe is
+cl "-nologo" "/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Ferunme.exe"
+```
+
+MSYS2 provides a way to exclude `/` conversion via an environment variable.
+Please read their docs; below is another approach that could be used:
+
+```bash
+$ MSYS2_ARG_CONV_EXCL="/EHsc" cccl --cccl-verbose --cccl-slash /EHsc -g /tmp/runme.cpp -o runme.exe
+cl "-nologo" "/EHsc" "-Zi" "/tmp/runme.cpp" "-Ferunme.exe"
+# What the OS passes to cl.exe is
+cl "-nologo" "/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Ferunme.exe"
+```
+
+This operating system's conversion of absolute paths is very hit and miss,
+consider a small tweak specifying the output file with an absolute path: 
+
+```bash
+$ cccl --cccl-verbose --cccl-slash //EHsc -g /tmp/runme.cpp -o /tmp/runme.exe
+cl "-nologo" "//EHsc" "-Zi" "/tmp/runme.cpp" "-Fe/tmp/runme.exe"
+# What the OS passes to cl.exe is
+"-nologo" "/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Fe/tmp/runme.exe"
+```
+
+The operating system does not convert the path to runme.exe.
+
+The general recommendation for appropriate path conversion is look at all the
+operating system's tools.
+In this case `cygpath` is a great tool to do the correct conversion as follows:
+
+```bash
+$ cccl --cccl-verbose /EHsc -g $(cygpath -m /tmp/runme.cpp) -o $(cygpath -m /tmp/runme.exe)
+cl "-nologo" "-EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-FeC:/msys64/tmp/runme.exe"
+```
+Another wise choice is to use relative paths with forward slashes instead of absolute paths
+as these are nearly always compatible on both Unix and Windows.
 
 ### Environment
 
@@ -309,7 +395,7 @@ environment variable are treated as additional command line options to cccl.
 This can be handy for adding additional options or tweaking the verbosity 
 options without changing the build system.  For example:
 
-```
+```bash
 $ export CCCL_OPTIONS="--cccl-muffle --cccl-verbose /W3"
 $ cccl -O2 main.c
 cl "/nologo" "/W3" "/O2" "main.c"
@@ -317,7 +403,7 @@ cl "/nologo" "/W3" "/O2" "main.c"
 
 and assuming `CCCL_OPTIONS` is not set, then the above is the same as:
 
-```
+```bash
 $ cccl --cccl-muffle --cccl-verbose /W3 -O2 main.c
 cl "/nologo" "/W3" "/O2" "main.c"
 ```
@@ -334,8 +420,8 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-c** Converts to cl.exe's **/C**
  - **-g**[0-9] Converts to cl.exe's **/Zi**
  - **-O0** Converts to cl.exe's **/Ot** optimization option
- - **-L_path_** Converts to linker option **/LIBPATH:_path_**
- - **-l_library_** Converts to **lib_library_.lib** (except **-link**)
+ - **-L<i>path</i>** Converts to linker option **/LIBPATH:_path_**
+ - **-l<i>library</i>** Converts to **lib_library_.lib** (except **-link**)
  - **-m386** Converts to cl.exe's **/G3**
  - **-m486** Converts to cl.exe's **/G4**
  - **-mpentium** Converts to cl.exe's **/G5**
@@ -358,9 +444,10 @@ The following Unix compiler cc/gcc options are understood by cccl:
 The following are cccl specific options:
 
  - **--help** Displays cccl help
- - **--cccl-link** Passes the following option as a linker option
+ - **--cccl-link _OPTION_** Passes the option, _OPTION_, as a linker option
  - **--cccl-muffle** Removes cl.exe's verbiage (file names being compiled etc) 
    from being displayed
+ - **--cccl-slash** Do not convert unknown options starting with **/** to **-**
  - **--cccl-verbose** Displays how cl.exe is invoked
  - **--cccl-version** Displays cccl's version string
 
