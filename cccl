@@ -53,6 +53,48 @@ slash_slash="${slash}"
 verbose=
 shared_index=-1
 
+# "dumpmachine" is a CC command-line argument to show the compiler's host triplet
+# "cccl" will follow "clang"'s MSVC "dumpmachine" output
+# "dumpmachinefull" is added as well to show the full MSVC version
+# Process the "dumpmachine"/"dumpmachinefull" arguments first, if they exist, and exit gracefully
+for arg in $@; do
+    if [[ $arg =~ ^-dumpmachine(full)?$ ]]; then
+        cl_output_parts=($($prog 2>&1))
+
+        msvc="msvc"
+        if [ "$arg" == "-dumpmachinefull" ]; then
+            msvc="$msvc${cl_output_parts[6]}"
+        fi
+
+        arch="$(echo ${cl_output_parts[8]} | awk '{print tolower($0)}')"
+        output="pc-windows-$msvc"
+        case $arch in
+
+        x64)
+            output="x86_64-$output"
+            ;;
+
+        # "file" command, with "libmagic", shows "Intel 80386" for "X86" architecture
+        x86)
+            output="i386-$output"
+            ;;
+
+        arm64)
+            output="aarch64-$output"
+            ;;
+
+        # "file" command, with "libmagic", shows "ARMv7" for "ARM" architecture
+        arm)
+            output="armv7-$output"
+            ;;
+
+        esac
+
+        echo $output
+        exit 0
+    fi
+done
+
 processargs()
 {
 ### Run through every option and convert it to the proper MS one
