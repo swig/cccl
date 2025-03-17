@@ -245,9 +245,44 @@ EOF
         ;;
 
     -std=*)
-        clopt+=("${slash}std:${1:5}")
         case "$1" in
-        -std=c++*)
+        -std=c++98|-std=c++03|-std=c++11)
+            # "Note that the MSVC compiler does not, and never will, support a
+            # C++11, C++03, or C++98 standards version switch."
+            # https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+            #
+            # We can at least turn off permissive mode.
+            clopt+=("${slash}permissive-")
+            ;;
+
+        -std=gnu++98|-std=gnu++03|-std=gnu++11)
+            # Similar to above, but leave permissive mode on.
+            ;;
+
+        -std=c89|-std=c90|-std=c99)
+            # MSVC only documents accepting /std=c11 and upwards.
+            #
+            # We can at least turn off permissive mode.
+            clopt+=("${slash}permissive-")
+            ;;
+
+        -std=gnu89|-std=gnu90|-std=gnu99)
+            # Similar to above, but leave permissive mode on.
+            ;;
+
+        *)
+            clopt+=("${slash}std:${1:5}")
+            ;;
+        esac
+
+        case "$1" in
+        -std=c++*|-std=gnu++*)
+            # This is needed to get MSVC to define __cplusplus to the correct
+            # value, but is only supported by Visual Studio 2017 version 15.7
+            # and later.  Earlier versions will emit a warning but it's hard
+            # to see how to avoid this:
+            #
+            # cl : Command line warning D9002 : ignoring unknown option '/Zc:__cplusplus'
             clopt+=("${slash}Zc:__cplusplus")
             ;;
         esac
