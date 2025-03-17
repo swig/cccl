@@ -418,6 +418,8 @@ The following Unix compiler cc/gcc options are understood by cccl:
 
  - **-ansi** Converts to cl.exe's **/Za**
  - **-c** Converts to cl.exe's **/C**
+ - **-dumpmachine** Target machine information based on info in copyright banner
+ - **-dumpversion** Version of cl.exe based on info in copyright banner
  - **-g**[0-9] Converts to cl.exe's **/Zi**
  - **-O0** Converts to cl.exe's **/Ot** optimization option
  - **-L<i>path</i>** Converts to linker option **/LIBPATH:_path_**

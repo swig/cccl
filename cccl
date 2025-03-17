@@ -53,46 +53,52 @@ slash_slash="${slash}"
 verbose=
 shared_index=-1
 
-# "dumpmachine" is a CC command-line argument to show the compiler's host triplet
-# "cccl" will follow "clang"'s MSVC "dumpmachine" output
-# "dumpmachinefull" is added as well to show the full MSVC version
-# Process the "dumpmachine"/"dumpmachinefull" arguments first, if they exist, and exit gracefully
+### First process arguments that exit immediately
 for arg in $@; do
-    if [[ $arg =~ ^-dumpmachine(full)?$ ]]; then
+    case "$arg" in
+    -dumpmachine)
+        # "dumpmachine" is a CC command-line argument to show the compiler's host triplet and exit immediately
+        # "cccl" will follow "clang"'s MSVC "dumpmachine" output
         cl_output_parts=($($prog 2>&1))
+        arch="$(echo ${cl_output_parts[8]} | tr "[:upper:]" "[:lower:]")"
+        output="pc-windows-msvc"
 
-        msvc="msvc"
-        if [ "$arg" == "-dumpmachinefull" ]; then
-            msvc="$msvc${cl_output_parts[6]}"
-        fi
-
-        arch="$(echo ${cl_output_parts[8]} | awk '{print tolower($0)}')"
-        output="pc-windows-$msvc"
         case $arch in
-
         x64)
             output="x86_64-$output"
             ;;
 
-        # "file" command, with "libmagic", shows "Intel 80386" for "X86" architecture
+        # "file" command, with "libmagic", shows "Intel 80386" for gcc/clang/msvc, use i686 like on gcc/clang
         x86)
-            output="i386-$output"
+            output="i686-$output"
             ;;
 
+        # Output triplet same as gcc and clang on ARMv8
         arm64)
             output="aarch64-$output"
             ;;
 
-        # "file" command, with "libmagic", shows "ARMv7" for "ARM" architecture
+        # Output triplet same as gcc and clang on ARMv7
         arm)
-            output="armv7-$output"
+            output="arm-$output"
             ;;
 
+        *)
+            output="unknown-$output"
+            ;;
         esac
 
         echo $output
         exit 0
-    fi
+        ;;
+
+    -dumpversion)
+        cl_output_parts=($($prog 2>&1))
+        cl_version="$(echo ${cl_output_parts[6]} | tr "[:upper:]" "[:lower:]")"
+        echo $cl_version
+        exit 0
+        ;;
+    esac
 done
 
 processargs()
