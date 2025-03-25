@@ -433,7 +433,8 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-pedantic** Removed/ignored, cl.exe does not support any equivalent
  - **-std=_standard_** Converts to cl.exe' **/std:_standard_**
  - **-Wl,<option1>(,<option2>)** Options are passed to the linker
- - **-W** Removed/ignored
+ - **-Werror** Converts to cl.exe's **/WX**
+ - **-W** Remaining warnings removed/ignored
  - **-fno-strict-aliasing** Removed/ignored
  - **-isystem** Converted to **/I**
  - **-include** Converted to **/FI**

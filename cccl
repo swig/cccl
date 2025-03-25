@@ -299,8 +299,11 @@ EOF
         done
         ;;
 
+    -Werror)
+        clopt+=("${slash}WX")
+        ;;
     -W*)
-        #ignore warnings
+        #ignore remaining warnings
         ;;
 
     -fno-strict-aliasing*)
