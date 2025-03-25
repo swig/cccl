@@ -317,6 +317,11 @@ EOF
         clopt+=("${slash}I$1")
         ;;
 
+    -include)
+        shift
+        clopt+=("${slash}FI$1")
+        ;;
+
     -rpath)
         #ignore this arg and the path
         shift

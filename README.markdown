@@ -436,6 +436,7 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-W** Removed/ignored
  - **-fno-strict-aliasing** Removed/ignored
  - **-isystem** Converted to **/I**
+ - **-include** Converted to **/FI**
  - **-MT** Due to conflict with cl.exe's **/MT** option, there is no support
    and cccl exits
  - **-mno-cygwin** Removed/ignored
