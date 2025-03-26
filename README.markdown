@@ -324,7 +324,7 @@ Consider the input file specified with an absolute path in the next example:
 $ cccl --cccl-verbose /EHsc -g /tmp/runme.cpp -o runme.exe
 cl "-nologo" "-EHsc" "-Zi" "-tmp/runme.cpp" "-Ferunme.exe"
 ```
-Note how `/tmp/runme.cpp` is modified to `-tmp/runme.cpp`, which is default handling
+Note how `/tmp/runme.cpp` is modified to `-tmp/runme.cpp`, which is the default handling
 for cccl for unknown 'options' beginning with `/`, even though a path was intended in
 this instance.
 
@@ -372,12 +372,12 @@ consider a small tweak specifying the output file with an absolute path:
 $ cccl --cccl-verbose --cccl-slash //EHsc -g /tmp/runme.cpp -o /tmp/runme.exe
 cl "-nologo" "//EHsc" "-Zi" "/tmp/runme.cpp" "-Fe/tmp/runme.exe"
 # What the OS passes to cl.exe is
-"-nologo" "/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Fe/tmp/runme.exe"
+cl "-nologo" "/EHsc" "-Zi" "C:/msys64/tmp/runme.cpp" "-Fe/tmp/runme.exe"
 ```
 
 The operating system does not convert the path to runme.exe.
 
-The general recommendation for appropriate path conversion is look at all the
+The general recommendation for appropriate path conversion is to look at all the
 operating system's tools.
 In this case `cygpath` is a great tool to do the correct conversion as follows:
 
@@ -428,18 +428,16 @@ The following Unix compiler cc/gcc options are understood by cccl:
  - **-m486** Converts to cl.exe's **/G4**
  - **-mpentium** Converts to cl.exe's **/G5**
  - **-mpentiumpro** Converts to cl.exe's **/G6**
- - **-o** is converted to **/Fo** for object files and **/Fe** for executables
-   and dlls
+ - **-o** is converted to **/Fo** for object files and **/Fe** for executables and dlls
  - **-pedantic** Removed/ignored, cl.exe does not support any equivalent
- - **-std=_standard_** Converts to cl.exe' **/std:_standard_**
+ - **-std=_standard_** Converts to cl.exe' **/std:_standard_** for **c++14**, **gnu++14**, **c11**, **gnu11** and later **standard**, otherwise removed/ignored 
  - **-Wl,<option1>(,<option2>)** Options are passed to the linker
  - **-Werror** Converts to cl.exe's **/WX**
- - **-W** Remaining warnings removed/ignored
+ - **-W** Remaining warnings removed/ignored, please provide **/W** options for warning control
  - **-fno-strict-aliasing** Removed/ignored
  - **-isystem** Converted to **/I**
  - **-include** Converted to **/FI**
- - **-MT** Due to conflict with cl.exe's **/MT** option, there is no support
-   and cccl exits
+ - **-MT** Due to conflict with cl.exe's **/MT** option, there is no support and cccl exits
  - **-mno-cygwin** Removed/ignored
  - **-rpath** Removed/ignored
  - **-shared** Converts to cl.exe's **/LD** or **/LDd** if -g is used
@@ -523,13 +521,23 @@ The main improvements in version 1.0 over the original cccl release 0.03 are:
 
 ### Version 1.2 (24 Apr 2021)
 
-* Support -link option the same as /link
-* Add conversion for -std option
+* Support -link option the same as /link.
+* Add conversion for -std option.
 
 ### Version 1.3 (18 Nov 2022)
 
-* Add support for space after -I and -L options
-* Documentation updates
+* Add support for space after -I and -L options.
+* Documentation updates.
+
+### Version 1.4 (26 Mar 2025)
+
+* #20 Fix detection of MSYS/MSYS2 operating system.
+* #19 Fix --cccl-muffle to handle non-text output.
+* #10 Add --cccl-slash option for better path handling on MYS/MSYS2.
+* #15 Add support for -dumpmachine and -dumpversion.
+* #17 Improved -std option handling.
+* Add support for -include.
+* Add support for -Werror.
 
 ### Future
 
@@ -543,7 +551,8 @@ bug fixes and improvements that meet these goals are encouraged.
 
 ## See Also
 
-[wgcc](https://sourceforge.net/projects/interix-wgcc/) is another cccl like
+* [msvcc.sh](https://github.com/libffi/libffi/blob/master/msvcc.sh)
+* [wgcc](https://sourceforge.net/projects/interix-wgcc/) is another cccl like
 tool for Interix but was superceded by
 [parity](https://github.com/mduft/parity).
-[msvcc.sh](https://github.com/libffi/libffi/blob/master/msvcc.sh)
+
